@@ -1,28 +1,53 @@
 package gorevisit
 
 import (
+	"encoding/base64"
+	"io/ioutil"
 	"testing"
 )
 
-var (
-	// FIXME: replace with actual test fixture
-	testMsg = []byte("")
-)
+func getValidTestMessage(t *testing.T) *ApiMsg {
+	imageBytes, _ := ioutil.ReadFile("./fixtures/bob.jpg")
+	image64 := base64.StdEncoding.EncodeToString(imageBytes)
 
-func TestNewApiMsgFromJson(t *testing.T) {
-	_, err := NewApiMsgFromJson(testMsg)
+	soundBytes, _ := ioutil.ReadFile("./fixtures/scream.ogg")
+	sound64 := base64.StdEncoding.EncodeToString(soundBytes)
+
+	content := &Content{
+		Type: "image/jpeg",
+		Data: image64,
+	}
+
+	audioContent := &Content{
+		Type: "audio/ogg",
+		Data: sound64,
+	}
+
+	metaContent := &MetaContent{
+		Audio: audioContent,
+	}
+
+	apiMsg := &ApiMsg{
+		Content: content,
+		Meta:    metaContent,
+	}
+
+	return apiMsg
+
+}
+
+func TestJson(t *testing.T) {
+	msg := getValidTestMessage(t)
+	_, err := msg.Json()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestJson(t *testing.T) {
-	msg, err := NewApiMsgFromJson(testMsg)
-	if err != nil {
-		t.Error(err)
-	}
-
-	_, err = msg.Json()
+func TestNewApiMsgFromJson(t *testing.T) {
+	msg := getValidTestMessage(t)
+	jsonMsg, _ := msg.Json()
+	_, err := NewApiMsgFromJson(jsonMsg)
 	if err != nil {
 		t.Error(err)
 	}
