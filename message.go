@@ -1,6 +1,7 @@
 package gorevisit
 
 import (
+	"encoding/json"
 	"errors"
 )
 
@@ -30,10 +31,13 @@ type ApiMsg struct {
 // NewApiMsgFromJson returns an ApiMsg struct pointer
 // from a json byte array.
 func NewApiMsgFromJson(b []byte) (*ApiMsg, error) {
-	return &ApiMsg{}, ErrNotImplemented
+	var a ApiMsg
+	err := json.Unmarshal(b, &a)
+	return &a, err
 }
 
 // Json serializes a gorevisit.ApiMsg back to JSON bytes
 func (a *ApiMsg) Json() ([]byte, error) {
-	return []byte(""), ErrNotImplemented
+	b, err := json.Marshal(a)
+	return b, err
 }
