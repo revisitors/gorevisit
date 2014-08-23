@@ -15,51 +15,8 @@ var (
 
 ```go
 type ApiMsg struct {
-	Content ContentInfo
-	Meta    struct{ Audio ContentInfo }
-}
-```
-
-
-#### func  NewApiMsgFromJson
-
-```go
-func NewApiMsgFromJson(b []byte) (*ApiMsg, error)
-```
-
-#### func (*ApiMsg) Json
-
-```go
-func (a *ApiMsg) Json() ([]byte, error)
-```
-
-#### type ContentInfo
-
-```go
-type ContentInfo struct {
-	Type string
-	Data []byte
-}
-```
-# gorevisit
---
-    import "github.com/revisitors/go.revisit.link"
-
-
-## Usage
-
-```go
-var (
-	ErrNotImplemented = errors.New("not implemented yet")
-)
-```
-
-#### type ApiMsg
-
-```go
-type ApiMsg struct {
-	Content *Content
-	Meta    *MetaContent
+	Content *Content     `json:"content"`
+	Meta    *MetaContent `json:"meta"`
 }
 ```
 
@@ -84,8 +41,8 @@ Json serializes a gorevisit.ApiMsg back to JSON bytes
 
 ```go
 type Content struct {
-	Type string
-	Data string
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
 ```
 
@@ -95,7 +52,7 @@ Content contains a type and a byte array and should be an image
 
 ```go
 type MetaContent struct {
-	Audio *Content
+	Audio *Content `json:"audio"`
 }
 ```
 
