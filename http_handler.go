@@ -1,12 +1,17 @@
 package gorevisit
 
 import (
+	"github.com/Sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 )
 
 const (
-	payloadLimit = 1000000
+	payloadLimit = 1e6
+)
+
+var (
+	log = logrus.New()
 )
 
 // RevisitService holds context for a POST handler for revisit
@@ -25,6 +30,10 @@ func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		rs.PostHandler(w, r)
 	default:
+		log.WithFields(logrus.Fields{
+			"status": http.StatusMethodNotAllowed,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusMethodNotAllowed)
 		return
 	}
@@ -33,6 +42,10 @@ func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // PostHandler handles a POST to a revisit service
 func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") != "application/json" {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
@@ -40,42 +53,68 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	payload := http.MaxBytesReader(w, r.Body, payloadLimit)
 	payloadBytes, err := ioutil.ReadAll(payload)
 	if err != nil {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	original, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
 	if !original.IsValid() {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	morphed, err := rs.transform(original)
+	transformed, err := rs.transform(original)
 
 	if err != nil {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+			"error":  err,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
-	if !morphed.IsValid() {
+	if !transformed.IsValid() {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
-	morphedJson, err := morphed.JSON()
+	transformedJSON, err := transformed.JSON()
 
 	if err != nil {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusUnsupportedMediaType,
+			"error":  err,
+		}).Error("HTTP Error")
+
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusAccepted)
-	w.Write(morphedJson)
+	w.Write(transformedJSON)
 
 	return
 }
