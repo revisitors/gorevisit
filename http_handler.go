@@ -26,6 +26,7 @@ func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
 
 // ServeHTTP implements a Revisit service to be passed to a mux
 func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	log.Infof("%v", r)
 	switch r.Method {
 	case "POST":
 		rs.PostHandler(w, r)
