@@ -66,7 +66,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	payloadBytes, err := ioutil.ReadAll(payload)
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
+			"status": http.StatusRequestEntityTooLarge,
 		}).Error("HTTP Error")
 
 		http.Error(w, "ROTFL", http.StatusRequestEntityTooLarge)
