@@ -10,7 +10,11 @@ const (
 )
 
 type RevisitService struct {
-	// INTERFACE
+	transform func(*APIMsg) (*APIMsg, error)
+}
+
+func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
+	return &RevisitService{transform: t}
 }
 
 func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -36,14 +40,38 @@ func (rs *RevisitService) HandlePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	apiMsg, err := NewAPIMsgFromJSON(payloadBytes)
+	original, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
 		http.Error(w, "ROFLMAO", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	if !apiMsg.IsValid() {
+	if !original.IsValid() {
 		http.Error(w, "ROFLMAO", http.StatusUnsupportedMediaType)
 		return
 	}
+
+	morphed, err := rs.transform(original)
+
+	if err != nil {
+		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		return
+	}
+
+	if !morphed.IsValid() {
+		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		return
+	}
+
+	morphedJson, err := morphed.JSON()
+
+	if err != nil {
+		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+	w.Write(morphedJson)
+
+	return
 }
