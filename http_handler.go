@@ -22,51 +22,51 @@ func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		rs.HandlePost(w, r)
 	default:
-		http.Error(w, "ROFLMAO", http.StatusMethodNotAllowed)
+		http.Error(w, "ROTFL", http.StatusMethodNotAllowed)
 		return
 	}
 }
 
 func (rs *RevisitService) HandlePost(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") != "application/json" {
-		http.Error(w, "ROFLMAO", http.StatusUnsupportedMediaType)
+		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
 	payload := http.MaxBytesReader(w, r.Body, PayloadLimit)
 	payloadBytes, err := ioutil.ReadAll(payload)
 	if err != nil {
-		http.Error(w, "ROFLMAO", http.StatusRequestEntityTooLarge)
+		http.Error(w, "ROTFL", http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	original, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
-		http.Error(w, "ROFLMAO", http.StatusUnsupportedMediaType)
+		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
 	if !original.IsValid() {
-		http.Error(w, "ROFLMAO", http.StatusUnsupportedMediaType)
+		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
 	morphed, err := rs.transform(original)
 
 	if err != nil {
-		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
 	if !morphed.IsValid() {
-		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
 	morphedJson, err := morphed.JSON()
 
 	if err != nil {
-		http.Error(w, "ROFLMAO", http.StatusInternalServerError)
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
