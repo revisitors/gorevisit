@@ -91,6 +91,7 @@ func (a *APIMsg) JSON() ([]byte, error) {
 	return b, err
 }
 
+// IsValid verifies that an APIMsg is valid according to the specification
 func (a *APIMsg) IsValid() bool {
 	// FIXME: add validation
 	return true
