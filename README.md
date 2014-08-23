@@ -47,6 +47,12 @@ func NewAPIMsgFromJSON(b []byte) (*APIMsg, error)
 ```
 NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
 
+#### func  SimpleBlend
+
+```go
+func SimpleBlend(input *APIMsg) (*APIMsg, error)
+```
+
 #### func (*APIMsg) IsValid
 
 ```go
@@ -65,7 +71,6 @@ JSON serializes a gorevisit.APIMsg back to JSON bytes
 
 ```go
 type Content struct {
-	Type string `json:"type"`
 	Data string `json:"data"`
 }
 ```
@@ -85,13 +90,14 @@ type DecodedContent struct {
 DecodedContent contains a type and a byte array, the byte array should be image
 data
 
-#### func  DataURIToBytes
+#### func  DataURIToDecodedContent
 
 ```go
-func DataURIToBytes(dataURI string) (*DecodedContent, error)
+func DataURIToDecodedContent(dataURI string) (*DecodedContent, error)
 ```
-DataURIToBytes returns a content type string and an array of bytes given a data
-URI encoded string. See RFC2397 - http://tools.ietf.org/html/rfc2397
+DataURIToDecodedContent returns a content type string and an array of bytes
+given a data URI encoded string. See RFC2397 -
+http://tools.ietf.org/html/rfc2397
 
 #### type MetaContent
 
@@ -107,6 +113,7 @@ MetaContent contains a Content pointer
 
 ```go
 type RevisitService struct {
+	Transform func(*APIMsg) (*APIMsg, error)
 }
 ```
 
@@ -126,12 +133,24 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request)
 ```
 PostHandler handles a POST to a revisit service
 
-#### func (*RevisitService) ServeHTTP
+#### func (*RevisitService) Run
 
 ```go
-func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request)
+func (rs *RevisitService) Run()
 ```
-ServeHTTP implements a Revisit service to be passed to a mux
+
+#### func (*RevisitService) ServiceCheckHandler
+
+```go
+func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request)
+```
+
+#### func (*RevisitService) TransformationHandler
+
+```go
+func (rs *RevisitService) TransformationHandler(w http.ResponseWriter, r *http.Request)
+```
+TransformationHandler implements a Revisit service to be passed to a mux
 
 #### type Transformer
 
