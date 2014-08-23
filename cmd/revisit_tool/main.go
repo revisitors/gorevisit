@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/Sirupsen/logrus"
 	revisit "github.com/revisitors/gorevisit"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -67,6 +68,8 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(resp.Status)
+
+		b, _ := ioutil.ReadAll(resp.Body)
+		fmt.Printf("%s", string(b))
 	}
 }

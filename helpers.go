@@ -13,10 +13,10 @@ func BytesToDataURI(data []byte, contentType string) string {
 		contentType, base64.StdEncoding.EncodeToString(data))
 }
 
-// DataURIToBytes returns a content type string and an array of bytes
+// DataURIToDecodedContent returns a content type string and an array of bytes
 // given a data URI encoded string.
 // See RFC2397 - http://tools.ietf.org/html/rfc2397
-func DataURIToBytes(dataURI string) (*DecodedContent, error) {
+func DataURIToDecodedContent(dataURI string) (*DecodedContent, error) {
 	parts := strings.Split(dataURI, ",")
 	contentType := parts[0]
 	contentBytes, err := base64.StdEncoding.DecodeString(parts[1])

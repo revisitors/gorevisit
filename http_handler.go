@@ -16,12 +16,12 @@ var (
 
 // RevisitService holds context for a POST handler for revisit
 type RevisitService struct {
-	transform func(*APIMsg) (*APIMsg, error)
+	Transform func(*APIMsg) (*APIMsg, error)
 }
 
 // NewRevisitService constructs a new Revisit service given a transform function
 func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
-	return &RevisitService{transform: t}
+	return &RevisitService{Transform: t}
 }
 
 // ServeHTTP implements a Revisit service to be passed to a mux
@@ -29,12 +29,12 @@ func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "POST":
 		rs.PostHandler(w, r)
+	case "HEAD":
+		w.WriteHeader(http.StatusOK)
+		return
 	default:
-		log.WithFields(logrus.Fields{
-			"status": http.StatusMethodNotAllowed,
-		}).Error("HTTP Error")
-
-		http.Error(w, "ROTFL", http.StatusMethodNotAllowed)
+		log.Infof("%v", r.Method)
+		w.WriteHeader(http.StatusAccepted)
 		return
 	}
 }
@@ -61,6 +61,8 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.WithFields(logrus.Fields{"type": "request"}).Info(string(payloadBytes))
+
 	original, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
 		log.WithFields(logrus.Fields{
@@ -80,7 +82,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transformed, err := rs.transform(original)
+	transformed, err := rs.Transform(original)
 
 	if err != nil {
 		log.WithFields(logrus.Fields{
