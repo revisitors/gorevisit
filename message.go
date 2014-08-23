@@ -2,11 +2,6 @@ package gorevisit
 
 import (
 	"encoding/json"
-	"errors"
-)
-
-var (
-	ErrNotImplemented = errors.New("not implemented yet")
 )
 
 // Content contains a type and a byte array
@@ -16,28 +11,28 @@ type Content struct {
 	Data string `json:"data"`
 }
 
-// AudioContent contains a Content pointer
+// MetaContent contains a Content pointer
 type MetaContent struct {
 	Audio *Content `json:"audio"`
 }
 
-// ApiMsg is a message containing Content, and MetaContent.
+// APIMsg is a message containing Content, and MetaContent.
 // the MetaContent should be audio.
-type ApiMsg struct {
+type APIMsg struct {
 	Content *Content     `json:"content"`
 	Meta    *MetaContent `json:"meta"`
 }
 
-// NewApiMsgFromJson returns an ApiMsg struct pointer
+// NewAPIMsgFromJSON returns an APIMsg struct pointer
 // from a json byte array.
-func NewApiMsgFromJson(b []byte) (*ApiMsg, error) {
-	var a ApiMsg
+func NewAPIMsgFromJSON(b []byte) (*APIMsg, error) {
+	var a APIMsg
 	err := json.Unmarshal(b, &a)
 	return &a, err
 }
 
-// Json serializes a gorevisit.ApiMsg back to JSON bytes
-func (a *ApiMsg) Json() ([]byte, error) {
+// JSON serializes a gorevisit.APIMsg back to JSON bytes
+func (a *APIMsg) JSON() ([]byte, error) {
 	b, err := json.Marshal(a)
 	return b, err
 }

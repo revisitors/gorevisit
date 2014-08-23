@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func getValidTestMessage(t *testing.T) *ApiMsg {
+func getValidTestAPIMsg(t *testing.T) *APIMsg {
 	imageBytes, _ := ioutil.ReadFile("./fixtures/bob.jpg")
 	image64 := base64.StdEncoding.EncodeToString(imageBytes)
 
@@ -27,7 +27,7 @@ func getValidTestMessage(t *testing.T) *ApiMsg {
 		Audio: audioContent,
 	}
 
-	apiMsg := &ApiMsg{
+	apiMsg := &APIMsg{
 		Content: content,
 		Meta:    metaContent,
 	}
@@ -36,18 +36,18 @@ func getValidTestMessage(t *testing.T) *ApiMsg {
 
 }
 
-func TestJson(t *testing.T) {
-	msg := getValidTestMessage(t)
-	_, err := msg.Json()
+func TestJSON(t *testing.T) {
+	msg := getValidTestAPIMsg(t)
+	_, err := msg.JSON()
 	if err != nil {
 		t.Error(err)
 	}
 }
 
-func TestNewApiMsgFromJson(t *testing.T) {
-	msg := getValidTestMessage(t)
-	jsonMsg, _ := msg.Json()
-	_, err := NewApiMsgFromJson(jsonMsg)
+func TestNewAPIMsgFromJSON(t *testing.T) {
+	msg := getValidTestAPIMsg(t)
+	jsonMsg, _ := msg.JSON()
+	_, err := NewAPIMsgFromJSON(jsonMsg)
 	if err != nil {
 		t.Error(err)
 	}

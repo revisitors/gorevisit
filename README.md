@@ -1,41 +1,42 @@
 # gorevisit
 --
-    import "github.com/revisitors/go.revisit.link"
+    import "github.com/revisitors/gorevisit"
 
 
 ## Usage
 
 ```go
 var (
-	ErrNotImplemented = errors.New("not implemented yet")
+	//ErrUnsupportedType is returned when a Transform does not support the type(s) passed to it
+	ErrUnsupportedType = errors.New("unsupported type")
 )
 ```
 
-#### type ApiMsg
+#### type APIMsg
 
 ```go
-type ApiMsg struct {
+type APIMsg struct {
 	Content *Content     `json:"content"`
 	Meta    *MetaContent `json:"meta"`
 }
 ```
 
-ApiMsg is a message containing Content, and MetaContent. the MetaContent should
+APIMsg is a message containing Content, and MetaContent. the MetaContent should
 be audio.
 
-#### func  NewApiMsgFromJson
+#### func  NewAPIMsgFromJSON
 
 ```go
-func NewApiMsgFromJson(b []byte) (*ApiMsg, error)
+func NewAPIMsgFromJSON(b []byte) (*APIMsg, error)
 ```
-NewApiMsgFromJson returns an ApiMsg struct pointer from a json byte array.
+NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
 
-#### func (*ApiMsg) Json
+#### func (*APIMsg) JSON
 
 ```go
-func (a *ApiMsg) Json() ([]byte, error)
+func (a *APIMsg) JSON() ([]byte, error)
 ```
-Json serializes a gorevisit.ApiMsg back to JSON bytes
+JSON serializes a gorevisit.APIMsg back to JSON bytes
 
 #### type Content
 
@@ -56,4 +57,14 @@ type MetaContent struct {
 }
 ```
 
-AudioContent contains a Content pointer
+MetaContent contains a Content pointer
+
+#### type Transformer
+
+```go
+type Transformer interface {
+	Transform(*APIMsg) (*APIMsg, error)
+}
+```
+
+Transformer interface transforms an APIMsg into another APIMsg
