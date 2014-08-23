@@ -16,7 +16,6 @@ type DecodedContent struct {
 // Content contains a type and a string, the string
 // should be a base64 encoded image
 type Content struct {
-	Type string `json:"type"`
 	Data string `json:"data"`
 }
 
@@ -64,12 +63,10 @@ func NewAPIMsgFromFiles(mediaPath ...string) (*APIMsg, error) {
 	soundDataURI := BytesToDataURI(soundBytes, "audio/ogg")
 
 	content := &Content{
-		Type: "image/jpeg",
 		Data: imageDataURI,
 	}
 
 	audioContent := &Content{
-		Type: "audio/ogg",
 		Data: soundDataURI,
 	}
 
