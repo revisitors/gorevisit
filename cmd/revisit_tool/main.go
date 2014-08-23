@@ -1,22 +1,30 @@
 package main
 
 import (
+	"bytes"
 	"encoding/base64"
 	"flag"
 	"fmt"
+	"github.com/Sirupsen/logrus"
 	revisit "github.com/revisitors/go.revisit.link"
 	"io/ioutil"
-	"log"
+	"net/http"
+	"net/url"
+	"strconv"
 )
 
 var (
 	image64 string
 	sound64 string
+	log     = logrus.New()
 )
 
 func main() {
+
 	var imageUrl = flag.String("image", "", "path to jpeg image file")
 	var soundUrl = flag.String("sound", "", "path to ogg sound file")
+	var output = flag.String("endpoint", "stdout", "where to output")
+
 	flag.Parse()
 
 	if *imageUrl != "" {
@@ -61,6 +69,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(jsonBytes))
+	switch *output {
+	case "stdout":
+		fmt.Println(string(jsonBytes))
+	default:
+		apiUrl, err := url.Parse(*output)
+		if err != nil {
+			log.Fatal(err)
+		}
 
+		client := &http.Client{}
+		r, _ := http.NewRequest("POST", apiUrl.String(), bytes.NewReader(jsonBytes))
+		r.Header.Add("Content-Type", "application/json")
+		r.Header.Add("Content-Length", strconv.Itoa(len(jsonBytes)))
+
+		resp, err := client.Do(r)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(resp.Status)
+	}
 }
