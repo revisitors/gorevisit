@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-func echoService(input *APIMsg) (*APIMsg, error) {
+func echoService(input *DecodedContent) (*DecodedContent, error) {
 	return input, nil
 }
 

@@ -17,11 +17,11 @@ var (
 
 // RevisitService holds context for a POST handler for revisit
 type RevisitService struct {
-	Transform func(*APIMsg) (*APIMsg, error)
+	Transform func(*DecodedContent) (*DecodedContent, error)
 }
 
 // NewRevisitService constructs a new Revisit service given a transform function
-func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
+func NewRevisitService(t func(*DecodedContent) (*DecodedContent, error)) *RevisitService {
 	return &RevisitService{Transform: t}
 }
 
@@ -77,7 +77,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.WithFields(logrus.Fields{"type": "request"}).Info(string(payloadBytes))
 
-	original, err := NewAPIMsgFromJSON(payloadBytes)
+	apiMsg, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"status": http.StatusUnsupportedMediaType,
@@ -87,7 +87,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !original.IsValid() {
+	if !apiMsg.IsValid() {
 		log.WithFields(logrus.Fields{
 			"status": http.StatusUnsupportedMediaType,
 		}).Error("HTTP Error")
@@ -96,11 +96,10 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transformed, err := rs.Transform(original)
-
+	inDecodedContent, err := apiMsg.GetImageDecodedContent()
 	if err != nil {
 		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
+			"status": http.StatusInternalServerError,
 			"error":  err,
 		}).Error("HTTP Error")
 
@@ -108,7 +107,21 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !transformed.IsValid() {
+	outDecodedContent, err := rs.Transform(inDecodedContent)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"status": http.StatusInternalServerError,
+			"error":  err,
+		}).Error("HTTP Error")
+
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
+		return
+	}
+
+	newBase64 := BytesToDataURI(outDecodedContent.Data, outDecodedContent.Type)
+	apiMsg.Content.Data = newBase64
+
+	if !apiMsg.IsValid() {
 		log.WithFields(logrus.Fields{
 			"status": http.StatusUnsupportedMediaType,
 		}).Error("HTTP Error")
@@ -117,7 +130,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transformedJSON, err := transformed.JSON()
+	transformedJSON, err := apiMsg.JSON()
 
 	if err != nil {
 		log.WithFields(logrus.Fields{
