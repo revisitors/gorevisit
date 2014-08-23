@@ -2,6 +2,7 @@ package gorevisit
 
 import (
 	"github.com/Sirupsen/logrus"
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"net/http"
 )
@@ -24,8 +25,18 @@ func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
 	return &RevisitService{Transform: t}
 }
 
-// ServeHTTP implements a Revisit service to be passed to a mux
-func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "HEAD":
+		w.WriteHeader(http.StatusOK)
+		return
+	default:
+		w.WriteHeader(http.StatusNotFound)
+	}
+}
+
+// TransformationHandler implements a Revisit service to be passed to a mux
+func (rs *RevisitService) TransformationHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%v", r)
 	switch r.Method {
 	case "POST":
@@ -120,4 +131,12 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(transformedJSON)
 
 	return
+}
+
+func (rs *RevisitService) Run() {
+	r := mux.NewRouter()
+	r.HandleFunc("/", rs.ServiceCheckHandler)
+	r.HandleFunc("/service", rs.TransformationHandler)
+	http.Handle("/", r)
+	http.ListenAndServe(":8080", r)
 }
