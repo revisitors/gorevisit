@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"os"
 )
 
 // DecodedContent contains a type and a byte array,
@@ -46,13 +47,20 @@ func NewAPIMsgFromFiles(mediaPath ...string) (*APIMsg, error) {
 		return &APIMsg{}, errors.New("must have image, may have audio")
 	}
 
+	f, err := os.Open(mediaPath[0])
+	if err != nil {
+		return &APIMsg{}, err
+	}
+	imageType := getFormat(f)
+	f.Close()
+
 	imageBytes, err := ioutil.ReadFile(mediaPath[0])
 	if err != nil {
 		return &APIMsg{}, err
 	}
 
 	// FIXME: add image type detection instead of hard coded jpeg
-	imageDataURI := BytesToDataURI(imageBytes, "image/jpeg")
+	imageDataURI := BytesToDataURI(imageBytes, imageType)
 
 	soundBytes, _ := ioutil.ReadFile(mediaPath[1])
 	if err != nil {
