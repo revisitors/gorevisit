@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/Sirupsen/logrus"
-	revisit "github.com/revisitors/go.revisit.link"
+	revisit "github.com/revisitors/gorevisit"
 	"net/http"
 	"net/url"
 	"strconv"
