@@ -22,7 +22,6 @@ func DataURIToDecodedContent(dataURI string) (*DecodedContent, error) {
 	contentBytes, err := base64.StdEncoding.DecodeString(parts[1])
 	if err != nil {
 		return &DecodedContent{}, err
-	} else {
-		return &DecodedContent{Type: contentType, Data: contentBytes}, nil
 	}
+	return &DecodedContent{Type: contentType, Data: contentBytes}, nil
 }

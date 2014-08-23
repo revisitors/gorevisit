@@ -5,13 +5,6 @@
 
 ## Usage
 
-```go
-var (
-	//ErrUnsupportedType is returned when a Transform does not support the type(s) passed to it
-	ErrUnsupportedType = errors.New("unsupported type")
-)
-```
-
 #### func  BytesToDataURI
 
 ```go
@@ -52,6 +45,7 @@ NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
 ```go
 func SimpleBlend(input *APIMsg) (*APIMsg, error)
 ```
+SimpleBlend is a simple transform as an example
 
 #### func (*APIMsg) IsValid
 
@@ -138,12 +132,14 @@ PostHandler handles a POST to a revisit service
 ```go
 func (rs *RevisitService) Run()
 ```
+Run starts the service
 
 #### func (*RevisitService) ServiceCheckHandler
 
 ```go
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request)
 ```
+ServiceCheckHandler handles presence checks from the hub
 
 #### func (*RevisitService) TransformationHandler
 
@@ -151,13 +147,3 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 func (rs *RevisitService) TransformationHandler(w http.ResponseWriter, r *http.Request)
 ```
 TransformationHandler implements a Revisit service to be passed to a mux
-
-#### type Transformer
-
-```go
-type Transformer interface {
-	Transform(*APIMsg) (*APIMsg, error)
-}
-```
-
-Transformer interface transforms an APIMsg into another APIMsg

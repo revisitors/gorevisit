@@ -25,6 +25,7 @@ func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService {
 	return &RevisitService{Transform: t}
 }
 
+// ServiceCheckHandler handles presence checks from the hub
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "HEAD":
@@ -133,6 +134,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Run starts the service
 func (rs *RevisitService) Run() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", rs.ServiceCheckHandler)
