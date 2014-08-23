@@ -33,6 +33,7 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 		return
 	default:
 		w.WriteHeader(http.StatusNotFound)
+		return
 	}
 }
 
