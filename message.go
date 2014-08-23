@@ -12,20 +12,20 @@ var (
 // Content contains a type and a byte array
 // and should be an image
 type Content struct {
-	Type string
-	Data string
+	Type string `json:"type"`
+	Data string `json:"data"`
 }
 
 // AudioContent contains a Content pointer
 type MetaContent struct {
-	Audio *Content
+	Audio *Content `json:"audio"`
 }
 
 // ApiMsg is a message containing Content, and MetaContent.
 // the MetaContent should be audio.
 type ApiMsg struct {
-	Content *Content
-	Meta    *MetaContent
+	Content *Content     `json:"content"`
+	Meta    *MetaContent `json:"meta"`
 }
 
 // NewApiMsgFromJson returns an ApiMsg struct pointer

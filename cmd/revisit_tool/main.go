@@ -15,24 +15,26 @@ var (
 )
 
 func main() {
-	var imageUrl = flag.String("image", "", "path to image file")
-	var soundUrl = flag.String("sound", "", "path to sound file")
+	var imageUrl = flag.String("image", "", "path to jpeg image file")
+	var soundUrl = flag.String("sound", "", "path to ogg sound file")
 	flag.Parse()
 
 	if *imageUrl != "" {
+		imageHeader := "data:image/jpeg;base64,"
 		imageBytes, err := ioutil.ReadFile(*imageUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
-		image64 = base64.StdEncoding.EncodeToString(imageBytes)
+		image64 = imageHeader + base64.StdEncoding.EncodeToString(imageBytes)
 	}
 
 	if *soundUrl != "" {
+		soundHeader := "data:audio/ogg;base64,"
 		soundBytes, err := ioutil.ReadFile(*soundUrl)
 		if err != nil {
 			log.Fatal(err)
 		}
-		sound64 = base64.StdEncoding.EncodeToString(soundBytes)
+		sound64 = soundHeader + base64.StdEncoding.EncodeToString(soundBytes)
 	}
 
 	content := &revisit.Content{
