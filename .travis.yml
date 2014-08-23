@@ -5,5 +5,5 @@ go:
         - 1.3
 
 script:
-        go get -t -v ./...
-        go test -v .
+        - go get -t -v ./...
+        - go test -v .
