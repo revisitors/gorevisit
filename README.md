@@ -18,6 +18,14 @@ var (
 )
 ```
 
+#### func  BytesToDataURI
+
+```go
+func BytesToDataURI(data []byte, contentType string) string
+```
+BytesToDataURI returns a data URI encoded string given a byte array and a
+content type See RFC2397 - http://tools.ietf.org/html/rfc2397
+
 #### type APIMsg
 
 ```go
@@ -29,6 +37,14 @@ type APIMsg struct {
 
 APIMsg is a message containing Content, and MetaContent. the MetaContent should
 be audio.
+
+#### func  NewAPIMsgFromFiles
+
+```go
+func NewAPIMsgFromFiles(mediaPath ...string) (*APIMsg, error)
+```
+NewAPIMsgFromFiles returns an APImsg struct pointer given a path to an image and
+audio file
 
 #### func  NewAPIMsgFromJSON
 
@@ -59,7 +75,28 @@ type Content struct {
 }
 ```
 
-Content contains a type and a byte array and should be an image
+Content contains a type and a string, the string should be a base64 encoded
+image
+
+#### type DecodedContent
+
+```go
+type DecodedContent struct {
+	Type string
+	Data []byte
+}
+```
+
+DecodedContent contains a type and a byte array, the byte array should be image
+data
+
+#### func  DataURIToBytes
+
+```go
+func DataURIToBytes(dataURI string) (*DecodedContent, error)
+```
+DataURIToBytes returns a content type string and an array of bytes given a data
+URI encoded string. See RFC2397 - http://tools.ietf.org/html/rfc2397
 
 #### type MetaContent
 
@@ -78,6 +115,12 @@ type RevisitService struct {
 }
 ```
 
+
+#### func  NewRevisitService
+
+```go
+func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService
+```
 
 #### func (*RevisitService) HandlePost
 

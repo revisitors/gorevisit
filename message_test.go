@@ -1,39 +1,15 @@
 package gorevisit
 
 import (
-	"encoding/base64"
-	"io/ioutil"
 	"testing"
 )
 
 func getValidTestAPIMsg(t *testing.T) *APIMsg {
-	imageBytes, _ := ioutil.ReadFile("./fixtures/bob.jpg")
-	image64 := base64.StdEncoding.EncodeToString(imageBytes)
-
-	soundBytes, _ := ioutil.ReadFile("./fixtures/scream.ogg")
-	sound64 := base64.StdEncoding.EncodeToString(soundBytes)
-
-	content := &Content{
-		Type: "image/jpeg",
-		Data: image64,
+	msg, err := NewAPIMsgFromFiles("./fixtures/bob.jpg", "./fixtures/scream.ogg")
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	audioContent := &Content{
-		Type: "audio/ogg",
-		Data: sound64,
-	}
-
-	metaContent := &MetaContent{
-		Audio: audioContent,
-	}
-
-	apiMsg := &APIMsg{
-		Content: content,
-		Meta:    metaContent,
-	}
-
-	return apiMsg
-
+	return msg
 }
 
 func TestJSON(t *testing.T) {
