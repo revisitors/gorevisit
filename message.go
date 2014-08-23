@@ -101,3 +101,12 @@ func (a *APIMsg) IsValid() bool {
 	// FIXME: add validation
 	return true
 }
+
+//GetImageDecodedContent returns a *DecodedContent struct
+func (a *APIMsg) GetImageDecodedContent() (*DecodedContent, error) {
+	d, err := DataURIToDecodedContent(a.Content.Data)
+	if err != nil {
+		return &DecodedContent{}, err
+	}
+	return d, nil
+}
