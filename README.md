@@ -6,6 +6,12 @@
 ## Usage
 
 ```go
+const (
+	PayloadLimit = 1000000
+)
+```
+
+```go
 var (
 	//ErrUnsupportedType is returned when a Transform does not support the type(s) passed to it
 	ErrUnsupportedType = errors.New("unsupported type")
@@ -30,6 +36,12 @@ be audio.
 func NewAPIMsgFromJSON(b []byte) (*APIMsg, error)
 ```
 NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
+
+#### func (*APIMsg) IsValid
+
+```go
+func (a *APIMsg) IsValid() bool
+```
 
 #### func (*APIMsg) JSON
 
@@ -58,6 +70,26 @@ type MetaContent struct {
 ```
 
 MetaContent contains a Content pointer
+
+#### type RevisitService
+
+```go
+type RevisitService struct {
+}
+```
+
+
+#### func (*RevisitService) HandlePost
+
+```go
+func (rs *RevisitService) HandlePost(w http.ResponseWriter, r *http.Request)
+```
+
+#### func (*RevisitService) ServeHTTP
+
+```go
+func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request)
+```
 
 #### type Transformer
 
