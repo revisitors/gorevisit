@@ -1,5 +1,6 @@
 package gorevisit
 
+// SimpleBlend is a simple transform as an example
 func SimpleBlend(input *APIMsg) (*APIMsg, error) {
 	imageContent, err := DataURIToDecodedContent(input.Content.Data)
 	if err != nil {
