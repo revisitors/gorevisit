@@ -36,3 +36,8 @@ func (a *APIMsg) JSON() ([]byte, error) {
 	b, err := json.Marshal(a)
 	return b, err
 }
+
+func (a *APIMsg) IsValid() bool {
+	// FIXME: add validation
+	return true
+}

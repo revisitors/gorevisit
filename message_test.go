@@ -47,8 +47,13 @@ func TestJSON(t *testing.T) {
 func TestNewAPIMsgFromJSON(t *testing.T) {
 	msg := getValidTestAPIMsg(t)
 	jsonMsg, _ := msg.JSON()
-	_, err := NewAPIMsgFromJSON(jsonMsg)
+
+	newMsg, err := NewAPIMsgFromJSON(jsonMsg)
 	if err != nil {
 		t.Error(err)
+	}
+
+	if !newMsg.IsValid() {
+		t.Error("message is not valid")
 	}
 }
