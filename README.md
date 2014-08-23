@@ -6,12 +6,6 @@
 ## Usage
 
 ```go
-const (
-	PayloadLimit = 1000000
-)
-```
-
-```go
 var (
 	//ErrUnsupportedType is returned when a Transform does not support the type(s) passed to it
 	ErrUnsupportedType = errors.New("unsupported type")
@@ -58,6 +52,7 @@ NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
 ```go
 func (a *APIMsg) IsValid() bool
 ```
+IsValid verifies that an APIMsg is valid according to the specification
 
 #### func (*APIMsg) JSON
 
@@ -115,24 +110,28 @@ type RevisitService struct {
 }
 ```
 
+RevisitService holds context for a POST handler for revisit
 
 #### func  NewRevisitService
 
 ```go
 func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService
 ```
+NewRevisitService constructs a new Revisit service given a transform function
 
-#### func (*RevisitService) HandlePost
+#### func (*RevisitService) PostHandler
 
 ```go
-func (rs *RevisitService) HandlePost(w http.ResponseWriter, r *http.Request)
+func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request)
 ```
+PostHandler handles a POST to a revisit service
 
 #### func (*RevisitService) ServeHTTP
 
 ```go
 func (rs *RevisitService) ServeHTTP(w http.ResponseWriter, r *http.Request)
 ```
+ServeHTTP implements a Revisit service to be passed to a mux
 
 #### type Transformer
 
