@@ -186,6 +186,13 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error)
 NewRevisitMsgFromFiles, given the path to an image file and optional path to an
 audio file, creates a JSON encoded Revisit.link message
 
+#### func (*RevisitMsg) ImageType
+
+```go
+func (r *RevisitMsg) ImageType() string
+```
+ImageType gets the type of image that is in the message
+
 #### type RevisitService
 
 ```go
