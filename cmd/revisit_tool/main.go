@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/Sirupsen/logrus"
@@ -30,13 +31,13 @@ func main() {
 		log.Fatal("--image is required")
 	}
 
-	var msg *revisit.APIMsg
+	var msg *revisit.RevisitMsg
 	var err error
 
 	if *soundPath != "" {
-		msg, err = revisit.NewAPIMsgFromFiles(*imagePath)
+		msg, err = revisit.NewRevisitMsgFromFiles(*imagePath)
 	} else {
-		msg, err = revisit.NewAPIMsgFromFiles(*imagePath, *soundPath)
+		msg, err = revisit.NewRevisitMsgFromFiles(*imagePath, *soundPath)
 	}
 
 	if err != nil {
@@ -45,7 +46,7 @@ func main() {
 		}).Fatal("could not create API message")
 	}
 
-	jsonBytes, err := msg.JSON()
+	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
