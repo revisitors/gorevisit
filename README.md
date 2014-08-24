@@ -40,13 +40,6 @@ func NewAPIMsgFromJSON(b []byte) (*APIMsg, error)
 ```
 NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
 
-#### func  SimpleBlend
-
-```go
-func SimpleBlend(input *APIMsg) (*APIMsg, error)
-```
-SimpleBlend is a simple transform as an example
-
 #### func (*APIMsg) IsValid
 
 ```go
@@ -72,27 +65,6 @@ type Content struct {
 Content contains a type and a string, the string should be a base64 encoded
 image
 
-#### type DecodedContent
-
-```go
-type DecodedContent struct {
-	Type string
-	Data []byte
-}
-```
-
-DecodedContent contains a type and a byte array, the byte array should be image
-data
-
-#### func  DataURIToDecodedContent
-
-```go
-func DataURIToDecodedContent(dataURI string) (*DecodedContent, error)
-```
-DataURIToDecodedContent returns a content type string and an array of bytes
-given a data URI encoded string. See RFC2397 -
-http://tools.ietf.org/html/rfc2397
-
 #### type MetaContent
 
 ```go
@@ -107,7 +79,7 @@ MetaContent contains a Content pointer
 
 ```go
 type RevisitService struct {
-	Transform func(*APIMsg) (*APIMsg, error)
+	Transform func(image.Image) (image.Image, error)
 }
 ```
 
@@ -116,7 +88,7 @@ RevisitService holds context for a POST handler for revisit
 #### func  NewRevisitService
 
 ```go
-func NewRevisitService(t func(*APIMsg) (*APIMsg, error)) *RevisitService
+func NewRevisitService(t func(image.Image) (image.Image, error)) *RevisitService
 ```
 NewRevisitService constructs a new Revisit service given a transform function
 
