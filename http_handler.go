@@ -45,6 +45,7 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 // ServiceHandler appropriately routes ervice requests from a Revisit.link hub
 func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%v", r)
+
 	switch r.Method {
 	case "POST":
 		rs.PostHandler(w, r)
@@ -62,29 +63,42 @@ func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
 // transforms the message, and returns the transformed message to the hub
 func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 
+	// check for valid header
 	if r.Header.Get("Content-Type") != "application/json" {
+		log.Errorf("error invalid header: %d", http.StatusUnsupportedMediaType)
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
+	// make sure message isn't too large
 	payloadReadCloser := http.MaxBytesReader(w, r.Body, payloadLimit)
 	payloadBytes, err := ioutil.ReadAll(payloadReadCloser)
 	if err != nil {
+		log.Errorf("error reading payload: %d", http.StatusRequestEntityTooLarge)
 		http.Error(w, "ROTFL", http.StatusRequestEntityTooLarge)
 		return
 	}
 
+	// decode the payload into a RevisitMsg
 	var msg *RevisitMsg
 	decoder := json.NewDecoder(bytes.NewReader(payloadBytes))
 	err = decoder.Decode(&msg)
 	if err != nil {
+		log.Errorf("error decoding json: %d", http.StatusUnsupportedMediaType)
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
+	// apply our transformation to the image.  if there's an error,
+	// log it and for now just return the original message that we received
 	newMsg, err := ImageRevisitor(msg, rs.imageTransformer)
 	if err != nil {
+		log.Errorf("error calling ImageRevisitor: %s", err)
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
+
+		w.Header().Set("Content-Type", "application/json")
+		enc := json.NewEncoder(w)
+		enc.Encode(msg)
 		return
 	}
 

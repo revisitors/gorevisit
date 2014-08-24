@@ -69,36 +69,32 @@ func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error
 	dstImgBuf := bytes.NewBuffer(nil)
 
 	format := m.ImageType()
-	log.Printf("FORMAT: %s\n", format)
+	log.Infof("Processing image in format: %s", format)
+
 	switch format {
 	case "image/jpeg":
-		log.Println("jpeg")
 		err = jpeg.Encode(dstImgBuf, dstImg, nil)
 		if err != nil {
 			return m, err
 		}
 	case "image/jpg":
-		log.Println("jpg")
 		err = jpeg.Encode(dstImgBuf, dstImg, nil)
 		if err != nil {
 			return m, err
 		}
 
 	case "image/png":
-		log.Println("png")
 		err = png.Encode(dstImgBuf, dstImg)
 		if err != nil {
 			return m, err
 		}
 	case "image/gif":
-		log.Println("gif")
 		err = gif.Encode(dstImgBuf, dstImg, nil)
 		if err != nil {
 			return m, err
 		}
 	default:
-		log.Println("default")
-		return m, nil
+		return m, errors.New(fmt.Sprintf("%s is not a supported image format", format))
 	}
 
 	dstImgBase64 := base64.StdEncoding.EncodeToString(dstImgBuf.Bytes())
