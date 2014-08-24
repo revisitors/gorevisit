@@ -12,27 +12,27 @@ import (
 	"strings"
 )
 
-type Image struct {
+type ImageData struct {
 	Data string `json:"data"`
 }
 
-func (i Image) ByteReader() io.Reader {
+func (i ImageData) ByteReader() io.Reader {
 	dataUri := i.Data
 	data := strings.Split(dataUri, ",")[1]
 	return base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
 }
 
-type Audio struct {
+type AudioData struct {
 	Data string `json:data"`
 }
 
-type Meta struct {
-	Audio Audio `json:"audio"`
+type MetaData struct {
+	Audio AudioData `json:"audio"`
 }
 
 type RevisitMsg struct {
-	Content Image `json:"content"`
-	Meta    Meta  `json:"meta"`
+	Content ImageData `json:"content"`
+	Meta    MetaData  `json:"meta"`
 }
 
 func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
@@ -58,7 +58,7 @@ func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error
 	dstImgBase64 := base64.StdEncoding.EncodeToString(dstImgBuf.Bytes())
 
 	return &RevisitMsg{
-		Content: Image{
+		Content: ImageData{
 			Data: fmt.Sprintf("data:image/%s;base64,%s", format, dstImgBase64),
 		},
 	}, nil
@@ -89,15 +89,15 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 	// FIXME: add sound type detection instead of hard coded ogg
 	soundDataURI := BytesToDataURI(soundBytes, "audio/ogg")
 
-	content := &Image{
+	content := &ImageData{
 		Data: imageDataURI,
 	}
 
-	audioContent := &Audio{
+	audioContent := &AudioData{
 		Data: soundDataURI,
 	}
 
-	metaContent := &Meta{
+	metaContent := &MetaData{
 		Audio: *audioContent,
 	}
 
