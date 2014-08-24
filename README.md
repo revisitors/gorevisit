@@ -1,3 +1,54 @@
+gorevisit
+=========
+
+A Story
+-------
+
+**Easy Fun with Revisit.link and Go**
+
+![Alt text](/public/images/happyfrodo.jpg?raw=true "excited frodo")
+
+**"I'm going to make cool glitches for revisit.link with golang!"**
+
+![Alt text](/public/images/killjoyaragorn.jpg?raw=true "buzzkill aragorn")
+
+**"You're going to need to learn how to write web services first"**
+
+![Alt text](/public/images/worriedfrodo.jpg?raw=true "worried frodo")
+
+**"But.. I just want to play with pixels and make cool art..."**
+
+![Alt text](/public/images/killjoyaragorn.jpg?raw=true "buzzkill aragorn")
+
+**"You need to know about encoding and decoding, and serialization and deserialization..."**
+
+![Alt text](/public/images/scaredfrodo.jpg?raw=true "scared frodo")
+
+ **"But..I just want to glitch pictures of cats and stuff this is too much work..."**
+
+![Alt text](/public/images/killjoyaragorn.jpg?raw=true "buzzkill aragorn")
+
+**rambling on and on about http headers and image type detection**
+
+![Alt text](/public/images/sickfrodo.jpg?raw=true "sick frodo")
+
+ **"computers are the worst..."**
+
+![Alt text](/public/images/whataboutgorevisit.jpg?raw=true "what about gorevisit")
+
+**"He doesn't even know about gorevisit"**
+
+![Alt text](/public/images/helpfuleowyn.jpg?raw=true "let's tell him about it")
+
+**"Gorevisit let's you just concentrate on hackin dem pixels!"**
+
+![Alt text](/public/images/happyfrodo.jpg?raw=true "excited frodo")
+
+**"computers are the BEST!"**
+
+Docs
+----
+
 # gorevisit
 --
     import "github.com/revisitors/gorevisit"
