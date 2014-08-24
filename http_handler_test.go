@@ -2,6 +2,7 @@ package gorevisit
 
 import (
 	"bytes"
+	"encoding/json"
 	"image"
 	"net/http"
 	"net/http/httptest"
@@ -9,17 +10,23 @@ import (
 	"testing"
 )
 
-func echoService(img image.Image) (image.Image, error) {
-	return img, nil
+func echoService(src image.Image, dst image.RGBA) error {
+	orig := src.Bounds()
+	for x := orig.Min.X; x < orig.Max.X; x++ {
+		for y := orig.Min.Y; y < orig.Max.Y; y++ {
+			dst.Set(x, y, src.At(x, y))
+		}
+	}
+	return nil
 }
 
 func TestRevisitHandlerPost(t *testing.T) {
-	msg, err := NewAPIMsgFromFiles("./fixtures/bob.jpg", "./fixtures/scream.ogg")
+	msg, err := NewRevisitMsgFromFiles("./fixtures/bob.jpg", "./fixtures/scream.ogg")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	jsonBytes, err := msg.JSON()
+	jsonBytes, err := json.Marshal(msg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -31,9 +38,9 @@ func TestRevisitHandlerPost(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	service := NewRevisitService(echoService)
-	service.TransformationHandler(w, req)
+	service.ServiceHandler(w, req)
 
-	if w.Code != http.StatusAccepted {
-		t.Errorf("expected %d status, received %d", http.StatusAccepted, w.Code)
+	if w.Code != http.StatusOK {
+		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)
 	}
 }
