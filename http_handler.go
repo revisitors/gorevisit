@@ -1,10 +1,17 @@
 package gorevisit
 
 import (
+	"bytes"
+	"encoding/base64"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
+	"image"
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -17,11 +24,11 @@ var (
 
 // RevisitService holds context for a POST handler for revisit
 type RevisitService struct {
-	Transform func(*DecodedContent) (*DecodedContent, error)
+	Transform func(image.Image) (image.Image, error)
 }
 
 // NewRevisitService constructs a new Revisit service given a transform function
-func NewRevisitService(t func(*DecodedContent) (*DecodedContent, error)) *RevisitService {
+func NewRevisitService(t func(image.Image) (image.Image, error)) *RevisitService {
 	return &RevisitService{Transform: t}
 }
 
@@ -55,77 +62,76 @@ func (rs *RevisitService) TransformationHandler(w http.ResponseWriter, r *http.R
 
 // PostHandler handles a POST to a revisit service
 func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Content-Type") != "application/json" {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
-		}).Error("HTTP Error")
 
+	// Check for appropriate header
+	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
+	// Check for appropriate message size
 	payload := http.MaxBytesReader(w, r.Body, payloadLimit)
 	payloadBytes, err := ioutil.ReadAll(payload)
 	if err != nil {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusRequestEntityTooLarge,
-		}).Error("HTTP Error")
-
 		http.Error(w, "ROTFL", http.StatusRequestEntityTooLarge)
 		return
 	}
 
 	log.WithFields(logrus.Fields{"type": "request"}).Info(string(payloadBytes))
 
+	// Convery POSTed JSON to apiMSG
 	apiMsg, err := NewAPIMsgFromJSON(payloadBytes)
 	if err != nil {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
-		}).Error("HTTP Error")
-
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
+	// Check validity of apiMsg
 	if !apiMsg.IsValid() {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
-		}).Error("HTTP Error")
-
 		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
 		return
 	}
 
-	inDecodedContent, err := apiMsg.GetImageDecodedContent()
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusInternalServerError,
-			"error":  err,
-		}).Error("HTTP Error")
+	// get []byte array of image content and string of type
+	dataURI := apiMsg.Content.Data
+	parts := strings.Split(dataURI, ",")
+	contentBytes, err := base64.StdEncoding.DecodeString(parts[1])
 
+	// convert byte array of img data to an actual image and get it's type
+	inImg, inImgType, err := image.Decode(bytes.NewBuffer(contentBytes))
+	if err != nil {
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
+		return
+	}
+	inImgType = "image/" + inImgType
+
+	// transform the actual image
+	_, err = rs.Transform(inImg)
+	if err != nil {
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
-	outDecodedContent, err := rs.Transform(inDecodedContent)
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusInternalServerError,
-			"error":  err,
-		}).Error("HTTP Error")
+	// create a buffer to write the encoded image to
+	imgBuf := new(bytes.Buffer)
 
-		http.Error(w, "ROTFL", http.StatusInternalServerError)
-		return
+	// encode the image back to bytes
+	switch inImgType {
+	case "image/gif":
+		log.Info("encoding gif")
+		gif.Encode(imgBuf, inImg, nil)
+	case "image/jpeg":
+		log.Info("encoding jpeg")
+		jpeg.Encode(imgBuf, inImg, nil)
+	case "image/png":
+		log.Info("encoding png")
+		png.Encode(imgBuf, inImg)
 	}
 
-	newBase64 := BytesToDataURI(outDecodedContent.Data, outDecodedContent.Type)
+	newBase64 := BytesToDataURI(imgBuf.Bytes(), inImgType)
 	apiMsg.Content.Data = newBase64
 
 	if !apiMsg.IsValid() {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
-		}).Error("HTTP Error")
-
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
@@ -133,11 +139,6 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	transformedJSON, err := apiMsg.JSON()
 
 	if err != nil {
-		log.WithFields(logrus.Fields{
-			"status": http.StatusUnsupportedMediaType,
-			"error":  err,
-		}).Error("HTTP Error")
-
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}

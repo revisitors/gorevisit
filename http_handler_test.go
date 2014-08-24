@@ -2,14 +2,15 @@ package gorevisit
 
 import (
 	"bytes"
+	"image"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 )
 
-func echoService(input *DecodedContent) (*DecodedContent, error) {
-	return input, nil
+func echoService(img image.Image) (image.Image, error) {
+	return img, nil
 }
 
 func TestRevisitHandlerPost(t *testing.T) {

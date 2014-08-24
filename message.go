@@ -7,13 +7,6 @@ import (
 	"os"
 )
 
-// DecodedContent contains a type and a byte array,
-// the byte array should be image data
-type DecodedContent struct {
-	Type string
-	Data []byte
-}
-
 // Content contains a type and a string, the string
 // should be a base64 encoded image
 type Content struct {
@@ -100,13 +93,4 @@ func (a *APIMsg) JSON() ([]byte, error) {
 func (a *APIMsg) IsValid() bool {
 	// FIXME: add validation
 	return true
-}
-
-//GetImageDecodedContent returns a *DecodedContent struct
-func (a *APIMsg) GetImageDecodedContent() (*DecodedContent, error) {
-	d, err := DataURIToDecodedContent(a.Content.Data)
-	if err != nil {
-		return &DecodedContent{}, err
-	}
-	return d, nil
 }

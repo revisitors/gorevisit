@@ -2,10 +2,11 @@ package main
 
 import (
 	revisit "github.com/revisitors/gorevisit"
+	"image"
 )
 
-func echoService(input *revisit.DecodedContent) (*revisit.DecodedContent, error) {
-	return input, nil
+func echoService(img image.Image) (image.Image, error) {
+	return img, nil
 }
 
 func main() {
