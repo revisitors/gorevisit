@@ -10,112 +10,121 @@
 ```go
 func BytesToDataURI(data []byte, contentType string) string
 ```
-BytesToDataURI returns a data URI encoded string given a byte array and a
-content type See RFC2397 - http://tools.ietf.org/html/rfc2397
+BytesToDataURI, given a byte array and a content type, creates a Data URI of the
+content
 
-#### type APIMsg
+#### type AudioData
 
 ```go
-type APIMsg struct {
-	Content *Content     `json:"content"`
-	Meta    *MetaContent `json:"meta"`
+type AudioData struct {
+	Data string `json:data"`
 }
 ```
 
-APIMsg is a message containing Content, and MetaContent. the MetaContent should
-be audio.
+AudioData holds a reference to the data URI of sound data in a Revisit.link
+message See: https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
 
-#### func  NewAPIMsgFromFiles
-
-```go
-func NewAPIMsgFromFiles(mediaPath ...string) (*APIMsg, error)
-```
-NewAPIMsgFromFiles returns an APImsg struct pointer given a path to an image and
-audio file
-
-#### func  NewAPIMsgFromJSON
+#### type ImageData
 
 ```go
-func NewAPIMsgFromJSON(b []byte) (*APIMsg, error)
-```
-NewAPIMsgFromJSON returns an APIMsg struct pointer from a json byte array.
-
-#### func (*APIMsg) IsValid
-
-```go
-func (a *APIMsg) IsValid() bool
-```
-IsValid verifies that an APIMsg is valid according to the specification
-
-#### func (*APIMsg) JSON
-
-```go
-func (a *APIMsg) JSON() ([]byte, error)
-```
-JSON serializes a gorevisit.APIMsg back to JSON bytes
-
-#### type Content
-
-```go
-type Content struct {
+type ImageData struct {
 	Data string `json:"data"`
 }
 ```
 
-Content contains a type and a string, the string should be a base64 encoded
-image
+ImageData holds a reference the data URI of image data in a Revisit.link message
+See: https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
 
-#### type MetaContent
+#### func (ImageData) ByteReader
 
 ```go
-type MetaContent struct {
-	Audio *Content `json:"audio"`
+func (i ImageData) ByteReader() io.Reader
+```
+ByteReader returns an io.Reader for the image data in a Revisit message
+
+#### type MetaData
+
+```go
+type MetaData struct {
+	Audio AudioData `json:"audio"`
 }
 ```
 
-MetaContent contains a Content pointer
+MetaData wraps the Audio data of a Revisit.link message as per the specification
+See: http://revisit.link/spec.html
+
+#### type RevisitMsg
+
+```go
+type RevisitMsg struct {
+	Content ImageData `json:"content"`
+	Meta    MetaData  `json:"meta"`
+}
+```
+
+RevisitMsg holds a decoded Revisit.link message See:
+http://revisit.link/spec.html
+
+#### func  ImageRevisitor
+
+```go
+func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error)
+```
+ImageRevisitor, given a RevisitMsg and an image transformation function, runs
+the image data through the transformation and returns a new RevisitMsg with the
+transformed image
+
+#### func  NewRevisitMsgFromFiles
+
+```go
+func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error)
+```
+NewRevisitMsgFromFiles, given the path to an image file and optional path to an
+audio file, creates a JSON encoded Revisit.link message
 
 #### type RevisitService
 
 ```go
 type RevisitService struct {
-	Transform func(image.Image) (image.Image, error)
 }
 ```
 
-RevisitService holds context for a POST handler for revisit
+RevisitService holds the necessary context for a Revisit.link service.
+Currently, this consists of an imageTransformer
 
 #### func  NewRevisitService
 
 ```go
-func NewRevisitService(t func(image.Image) (image.Image, error)) *RevisitService
+func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService
 ```
-NewRevisitService constructs a new Revisit service given a transform function
+NewRevisitService, given an image transformation function, returns a new
+Revisit.link service
 
 #### func (*RevisitService) PostHandler
 
 ```go
 func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request)
 ```
-PostHandler handles a POST to a revisit service
+PostHandler accepts POSTed revisit messages from a Revisit.link hub, transforms
+the message, and returns the transformed message to the hub
 
 #### func (*RevisitService) Run
 
 ```go
 func (rs *RevisitService) Run()
 ```
-Run starts the service
+Run starts the Revisit.link service
 
 #### func (*RevisitService) ServiceCheckHandler
 
 ```go
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request)
 ```
-ServiceCheckHandler handles presence checks from the hub
+ServiceCheckHandler responts to availability requests from a Revisit.link hub
 
-#### func (*RevisitService) TransformationHandler
+#### func (*RevisitService) ServiceHandler
 
 ```go
-func (rs *RevisitService) TransformationHandler(w http.ResponseWriter, r *http.Request)
+func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
 ```
-TransformationHandler implements a Revisit service to be passed to a mux
+ServiceHandler appropriately routes ervice requests from a Revisit.link hub

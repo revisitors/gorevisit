@@ -18,14 +18,19 @@ var (
 	log = logrus.New()
 )
 
+// RevisitService holds the necessary context for a Revisit.link service.
+// Currently, this consists of an imageTransformer
 type RevisitService struct {
 	imageTransformer func(image.Image, image.RGBA) error
 }
 
+// NewRevisitService, given an image transformation function, returns
+// a new Revisit.link service
 func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService {
 	return &RevisitService{imageTransformer: it}
 }
 
+// ServiceCheckHandler responts to availability requests from a Revisit.link hub
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "HEAD":
@@ -37,6 +42,7 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 	}
 }
 
+// ServiceHandler appropriately routes ervice requests from a Revisit.link hub
 func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%v", r)
 	switch r.Method {
@@ -52,6 +58,8 @@ func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+// PostHandler accepts POSTed revisit messages from a Revisit.link hub,
+// transforms the message, and returns the transformed message to the hub
 func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -86,6 +94,7 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
+// Run starts the Revisit.link service
 func (rs *RevisitService) Run() {
 	r := mux.NewRouter()
 	r.HandleFunc("/", rs.ServiceCheckHandler)
