@@ -4,19 +4,21 @@ import (
 	revisit "github.com/revisitors/gorevisit"
 	"image"
 	"image/color"
-	"log"
 	"math/rand"
 )
 
 func noise(src image.Image, dst image.RGBA) error {
+	// get the boundary box of the original image
 	orig := src.Bounds()
 
+	// copy it into the destination image buffer
 	for x := orig.Min.X; x < orig.Max.X; x++ {
 		for y := orig.Min.Y; y < orig.Max.Y; y++ {
 			dst.Set(x, y, src.At(x, y))
 		}
 	}
 
+	// shift some colors
 	numToMod := (orig.Max.X * orig.Max.Y) / 2
 	for i := 0; i < numToMod; i++ {
 		x := rand.Intn(orig.Max.X)
@@ -40,7 +42,9 @@ func noise(src image.Image, dst image.RGBA) error {
 }
 
 func main() {
-	log.Println("starting")
+	// make a RevisitService instance and pass it our glitcher
 	s := revisit.NewRevisitService(noise)
+
+	// run it!
 	s.Run()
 }

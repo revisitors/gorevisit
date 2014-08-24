@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/gif"
 	"image/jpeg"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -44,27 +46,59 @@ type RevisitMsg struct {
 	Meta    MetaData  `json:"meta"`
 }
 
+// ImageType gets the type of image that is in the message
+func (r *RevisitMsg) ImageType() string {
+	header := strings.Split(r.Content.Data, ",")[0]
+	subheader := strings.Split(header, ":")[1]
+	return strings.Split(subheader, ";")[0]
+}
+
 // ImageRevisitor, given a RevisitMsg and an image transformation function, runs the
 // image data through the transformation and returns a new RevisitMsg with the
 // transformed image
 func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
 	reader := m.Content.ByteReader()
-	srcImg, format, err := image.Decode(reader)
+	srcImg, _, err := image.Decode(reader)
 	if err != nil {
 		return m, err
-	}
-
-	if format != "jpeg" {
-		return m, nil
 	}
 
 	dstImg := image.NewRGBA(srcImg.Bounds())
 	err = t(srcImg, *dstImg)
 
 	dstImgBuf := bytes.NewBuffer(nil)
-	err = jpeg.Encode(dstImgBuf, dstImg, nil)
-	if err != nil {
-		return m, err
+
+	format := m.ImageType()
+	log.Printf("FORMAT: %s\n", format)
+	switch format {
+	case "image/jpeg":
+		log.Println("jpeg")
+		err = jpeg.Encode(dstImgBuf, dstImg, nil)
+		if err != nil {
+			return m, err
+		}
+	case "image/jpg":
+		log.Println("jpg")
+		err = jpeg.Encode(dstImgBuf, dstImg, nil)
+		if err != nil {
+			return m, err
+		}
+
+	case "image/png":
+		log.Println("png")
+		err = png.Encode(dstImgBuf, dstImg)
+		if err != nil {
+			return m, err
+		}
+	case "image/gif":
+		log.Println("gif")
+		err = gif.Encode(dstImgBuf, dstImg, nil)
+		if err != nil {
+			return m, err
+		}
+	default:
+		log.Println("default")
+		return m, nil
 	}
 
 	dstImgBase64 := base64.StdEncoding.EncodeToString(dstImgBuf.Bytes())
