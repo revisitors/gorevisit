@@ -4,8 +4,6 @@ gorevisit
 A Story
 -------
 
-**Easy Fun with Revisit.link and Go**
-
 ![Alt text](/public/images/happyfrodo.jpg?raw=true "excited frodo")
 
 **"I'm going to make cool glitches for revisit.link with golang!"**
