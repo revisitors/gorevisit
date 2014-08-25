@@ -38,7 +38,7 @@ func TestRevisitHandlerPost(t *testing.T) {
 	w := httptest.NewRecorder()
 
 	service := NewRevisitService(echoService)
-	service.ServiceHandler(w, req)
+	service.serviceHandler(w, req)
 
 	if w.Code != http.StatusOK {
 		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)

@@ -30,8 +30,8 @@ func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService {
 	return &RevisitService{imageTransformer: it}
 }
 
-// ServiceCheckHandler responds to availability requests from a Revisit.link hub
-func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request) {
+// serviceCheckHandler responds to availability requests from a Revisit.link hub
+func (rs *RevisitService) serviceCheckHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "HEAD":
 		w.WriteHeader(http.StatusOK)
@@ -42,13 +42,13 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 	}
 }
 
-// ServiceHandler appropriately routes service requests from a Revisit.link hub
-func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request) {
+// serviceHandler appropriately routes service requests from a Revisit.link hub
+func (rs *RevisitService) serviceHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%v", r)
 
 	switch r.Method {
 	case "POST":
-		rs.PostHandler(w, r)
+		rs.postHandler(w, r)
 	case "HEAD":
 		w.WriteHeader(http.StatusOK)
 		return
@@ -59,9 +59,9 @@ func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
-// PostHandler accepts POSTed revisit messages from a Revisit.link hub,
+// postHandler accepts POSTed revisit messages from a Revisit.link hub,
 // transforms the message, and returns the transformed message to the hub
-func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
+func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 
 	// check for valid header
 	if r.Header.Get("Content-Type") != "application/json" {
@@ -111,8 +111,8 @@ func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request) {
 // Run starts the Revisit.link service
 func (rs *RevisitService) Run() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", rs.ServiceCheckHandler)
-	r.HandleFunc("/service", rs.ServiceHandler)
+	r.HandleFunc("/", rs.serviceCheckHandler)
+	r.HandleFunc("/service", rs.serviceHandler)
 	http.Handle("/", r)
 	http.ListenAndServe(":8080", r)
 }

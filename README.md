@@ -102,7 +102,6 @@ func main() {
 Docs
 ----
 
-
 # gorevisit
 --
     import "github.com/revisitors/gorevisit"
@@ -212,31 +211,9 @@ func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService
 NewRevisitService given an image transformation function, returns a new
 Revisit.link service
 
-#### func (*RevisitService) PostHandler
-
-```go
-func (rs *RevisitService) PostHandler(w http.ResponseWriter, r *http.Request)
-```
-PostHandler accepts POSTed revisit messages from a Revisit.link hub, transforms
-the message, and returns the transformed message to the hub
-
 #### func (*RevisitService) Run
 
 ```go
 func (rs *RevisitService) Run()
 ```
 Run starts the Revisit.link service
-
-#### func (*RevisitService) ServiceCheckHandler
-
-```go
-func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request)
-```
-ServiceCheckHandler responds to availability requests from a Revisit.link hub
-
-#### func (*RevisitService) ServiceHandler
-
-```go
-func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
-```
-ServiceHandler appropriately routes service requests from a Revisit.link hub
