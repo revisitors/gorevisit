@@ -30,7 +30,7 @@ func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService {
 	return &RevisitService{imageTransformer: it}
 }
 
-// ServiceCheckHandler responts to availability requests from a Revisit.link hub
+// ServiceCheckHandler responds to availability requests from a Revisit.link hub
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "HEAD":
@@ -42,7 +42,7 @@ func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Req
 	}
 }
 
-// ServiceHandler appropriately routes ervice requests from a Revisit.link hub
+// ServiceHandler appropriately routes service requests from a Revisit.link hub
 func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request) {
 	log.Infof("%v", r)
 

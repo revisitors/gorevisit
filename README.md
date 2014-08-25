@@ -102,6 +102,7 @@ func main() {
 Docs
 ----
 
+
 # gorevisit
 --
     import "github.com/revisitors/gorevisit"
@@ -231,11 +232,11 @@ Run starts the Revisit.link service
 ```go
 func (rs *RevisitService) ServiceCheckHandler(w http.ResponseWriter, r *http.Request)
 ```
-ServiceCheckHandler responts to availability requests from a Revisit.link hub
+ServiceCheckHandler responds to availability requests from a Revisit.link hub
 
 #### func (*RevisitService) ServiceHandler
 
 ```go
 func (rs *RevisitService) ServiceHandler(w http.ResponseWriter, r *http.Request)
 ```
-ServiceHandler appropriately routes ervice requests from a Revisit.link hub
+ServiceHandler appropriately routes service requests from a Revisit.link hub
