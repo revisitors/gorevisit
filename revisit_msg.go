@@ -48,14 +48,14 @@ func (r *RevisitMsg) ImageType() string {
 	return strings.Split(subheader, ";")[0]
 }
 
-// BytesToDataURI, given a byte array and a content type,
+// BytesToDataURI given a byte array and a content type,
 // creates a Data URI of the content
 func BytesToDataURI(data []byte, contentType string) string {
 	return fmt.Sprintf("data:%s;base64,%s",
 		contentType, base64.StdEncoding.EncodeToString(data))
 }
 
-// NewRevisitMsgFromFiles, given the path to an image file and optional
+// NewRevisitMsgFromFiles given the path to an image file and optional
 // path to an audio file, creates a JSON encoded Revisit.link message
 func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 	if len(mediaPath) < 1 || len(mediaPath) > 2 {

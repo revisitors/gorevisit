@@ -3,7 +3,6 @@ package gorevisit
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"image"
 	"image/gif"
@@ -11,7 +10,7 @@ import (
 	"image/png"
 )
 
-// ImageRevisitor, given a RevisitMsg and an image transformation function, runs the
+// ImageRevisitor given a RevisitMsg and an image transformation function, runs the
 // image data through the transformation and returns a new RevisitMsg with the
 // transformed image
 func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
@@ -52,7 +51,7 @@ func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error
 			return m, err
 		}
 	default:
-		return m, errors.New(fmt.Sprintf("%s is not a supported image format", format))
+		return m, fmt.Errorf("%s is not a supported image format", format)
 	}
 
 	dstImgBase64 := base64.StdEncoding.EncodeToString(dstImgBuf.Bytes())

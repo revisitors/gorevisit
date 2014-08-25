@@ -114,7 +114,7 @@ Docs
 ```go
 func BytesToDataURI(data []byte, contentType string) string
 ```
-BytesToDataURI, given a byte array and a content type, creates a Data URI of the
+BytesToDataURI given a byte array and a content type, creates a Data URI of the
 content
 
 #### type AudioData
@@ -174,8 +174,8 @@ http://revisit.link/spec.html
 ```go
 func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error)
 ```
-ImageRevisitor, given a RevisitMsg and an image transformation function, runs
-the image data through the transformation and returns a new RevisitMsg with the
+ImageRevisitor given a RevisitMsg and an image transformation function, runs the
+image data through the transformation and returns a new RevisitMsg with the
 transformed image
 
 #### func  NewRevisitMsgFromFiles
@@ -183,7 +183,7 @@ transformed image
 ```go
 func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error)
 ```
-NewRevisitMsgFromFiles, given the path to an image file and optional path to an
+NewRevisitMsgFromFiles given the path to an image file and optional path to an
 audio file, creates a JSON encoded Revisit.link message
 
 #### func (*RevisitMsg) ImageType
@@ -208,7 +208,7 @@ Currently, this consists of an imageTransformer
 ```go
 func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService
 ```
-NewRevisitService, given an image transformation function, returns a new
+NewRevisitService given an image transformation function, returns a new
 Revisit.link service
 
 #### func (*RevisitService) PostHandler

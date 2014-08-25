@@ -24,7 +24,7 @@ type RevisitService struct {
 	imageTransformer func(image.Image, image.RGBA) error
 }
 
-// NewRevisitService, given an image transformation function, returns
+// NewRevisitService given an image transformation function, returns
 // a new Revisit.link service
 func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService {
 	return &RevisitService{imageTransformer: it}
