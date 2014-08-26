@@ -81,7 +81,7 @@ func getAnsiStream(byteChan chan []byte) {
 	for {
 		_, p, err := ws.ReadMessage()
 		if err != nil {
-			log.Error(err)
+			log.Println(err)
 			continue
 		}
 
