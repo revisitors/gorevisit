@@ -17,6 +17,7 @@ PERFORMANCE OF THIS SOFTWARE.
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/Knorkebrot/ansirgb"
 	"github.com/gorilla/websocket"
@@ -26,6 +27,8 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
+	"strings"
 )
 
 var (
@@ -37,6 +40,23 @@ type block struct {
 	bottom *ansirgb.Color
 }
 
+func (b *block) String() string {
+	ret := b.bottom.Bg()
+	if b.top != nil {
+		ret += b.top.Fg()
+		// If it's not a UTF-8 terminal, fall back to '#'
+		if strings.Contains(os.Getenv("LC_ALL"), "UTF-8") ||
+			strings.Contains(os.Getenv("LANG"), "UTF-8") {
+			ret += "\u2580"
+		} else {
+			ret += "#"
+		}
+	} else {
+		ret += " "
+	}
+	return ret
+}
+
 func cursorUp(count int) {
 	fmt.Printf("\033[%dA", count)
 }
@@ -45,7 +65,7 @@ func reset() {
 	fmt.Printf("\033[0m ")
 }
 
-func main() {
+func getAnsiStream(byteChan chan []byte) {
 	conn, err := net.Dial("tcp", "ws.revisit.link:80")
 	if err != nil {
 		panic(err)
@@ -61,7 +81,8 @@ func main() {
 	for {
 		_, p, err := ws.ReadMessage()
 		if err != nil {
-			log.Fatal(err)
+			log.Error(err)
+			continue
 		}
 
 		id := gorevisit.ImageData{
@@ -89,10 +110,11 @@ func main() {
 			fmt.Println("")
 		}
 		cursorUp(rows / 2)
+
+		var buf bytes.Buffer
+
 		for i := 1; i < rows; i += 2 {
 			for j := 0; j < width; j++ {
-				// TODO: get average color of the area instead
-				// of one pixel?
 				x := int(ratio * float64(j))
 				yTop := int(ratio * float64(i-1))
 				yBottom := int(ratio * float64(i))
@@ -100,15 +122,44 @@ func main() {
 				bottom := ansirgb.Convert(img.At(x, yBottom))
 				b := &block{}
 				b.bottom = bottom
-				// Foreground colors are lighter in some terminals.
-				// Ignore top (FG) if it's the same color anyway
 				if top.Code != bottom.Code {
 					b.top = top
 				}
-				fmt.Printf("%s", b)
+				fmt.Fprintf(&buf, "%s", b)
 			}
 			reset()
-			fmt.Printf("\n")
+			fmt.Fprintf(&buf, "\n")
 		}
+		content := buf.Bytes()
+		byteChan <- content
+	}
+}
+
+func clientConns(listener net.Listener) chan net.Conn {
+	ch := make(chan net.Conn)
+	go func() {
+		for {
+			client, _ := listener.Accept()
+			if client == nil {
+				continue
+			}
+			ch <- client
+		}
+	}()
+	return ch
+}
+func main() {
+	byteChan := make(chan []byte)
+	go getAnsiStream(byteChan)
+	handleConn := func(client net.Conn) {
+		for msg := range byteChan {
+			client.Write(msg)
+		}
+		client.Close()
+	}
+	server, _ := net.Listen("tcp", ":31337")
+	conns := clientConns(server)
+	for {
+		go handleConn(<-conns)
 	}
 }
