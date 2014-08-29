@@ -46,5 +46,5 @@ func main() {
 	s := revisit.NewRevisitService(noise)
 
 	// run it!
-	s.Run()
+	s.Run(":8080")
 }

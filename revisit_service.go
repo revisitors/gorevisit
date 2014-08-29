@@ -109,10 +109,10 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Run starts the Revisit.link service
-func (rs *RevisitService) Run() {
+func (rs *RevisitService) Run(port string) {
 	r := mux.NewRouter()
 	r.HandleFunc("/", rs.serviceCheckHandler)
 	r.HandleFunc("/service", rs.serviceHandler)
 	http.Handle("/", r)
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(port, r)
 }
