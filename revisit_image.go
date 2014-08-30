@@ -4,84 +4,49 @@ import (
 	"errors"
 	"image"
 	"image/gif"
-	"image/jpeg"
-	"image/png"
 )
 
 // RevisitImage can hold either a PNG, JPEG, or GIF
 type RevisitImage struct {
-	PNG  *image.Image
-	JPEG *image.Image
-	GIF  *gif.GIF
-	Type string
-}
-
-// IsGif return true if the RevisitImage holds a GIF
-func (ri *RevisitImage) IsGIF() bool {
-	switch ri.Type {
-	case "image/gif":
-		return true
-	default:
-		return false
-	}
-}
-
-// IsJPEG return true if the RevisitImage holds a JPEG,
-func (ri *RevisitImage) IsJPEG() bool {
-	switch ri.Type {
-	case "image/jpeg":
-		return true
-	default:
-		return false
-	}
-}
-
-// IsJPEG return true if the RevisitImage holds a PNG,
-func (ri *RevisitImage) IsPNG() bool {
-	switch ri.Type {
-	case "image/png":
-		return true
-	default:
-		return false
-	}
+	images []image.Image
 }
 
 // NewRevisitImageFromMsg constructs a RevisitImage from the
 // contents of a RevisitMsg
 func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
+	ri := &RevisitImage{
+		images: make([]image.Image, 1),
+	}
+
 	switch r.ImageType() {
-	case "image/gif":
-		img, err := gif.DecodeAll(r.Content.ByteReader())
-		if err != nil {
-			return nil, err
-		}
-
-		return &RevisitImage{
-			GIF:  img,
-			Type: r.ImageType(),
-		}, nil
-
 	case "image/jpeg":
-		img, err := jpeg.Decode(r.Content.ByteReader())
+		img, _, err := image.Decode(r.Content.ByteReader())
 		if err != nil {
 			return nil, err
 		}
 
-		return &RevisitImage{
-			JPEG: &img,
-			Type: r.ImageType(),
-		}, nil
+		ri.images = append(ri.images, img)
+		return ri, nil
 
 	case "image/png":
-		img, err := png.Decode(r.Content.ByteReader())
+		img, _, err := image.Decode(r.Content.ByteReader())
 		if err != nil {
 			return nil, err
 		}
 
-		return &RevisitImage{
-			PNG:  &img,
-			Type: r.ImageType(),
-		}, nil
+		ri.images = append(ri.images, img)
+		return ri, nil
+
+	case "image/gif":
+		gifs, err := gif.DecodeAll(r.Content.ByteReader())
+		if err != nil {
+			return nil, err
+		}
+
+		for _, g := range gifs.Image {
+			ri.images = append(ri.images, image.Image(g))
+		}
+		return ri, nil
 
 	default:
 		return nil, errors.New("invalid image type")
