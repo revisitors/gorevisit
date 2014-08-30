@@ -114,5 +114,6 @@ func (rs *RevisitService) Run(port string) {
 	r.HandleFunc("/", rs.serviceCheckHandler)
 	r.HandleFunc("/service", rs.serviceHandler)
 	http.Handle("/", r)
+  log.Infof("Listening to %s",port)
 	http.ListenAndServe(port, r)
 }
