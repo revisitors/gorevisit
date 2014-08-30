@@ -1,9 +1,11 @@
 package gorevisit
 
 import (
+	"bytes"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"image"
 	"io"
 	"io/ioutil"
 	"strings"
@@ -67,15 +69,24 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 		return &RevisitMsg{}, err
 	}
 
-	// FIXME: add image type detection instead of hard coded jpeg
-	imageDataURI := BytesToDataURI(imageBytes, "image/jpeg")
-
-	soundBytes, _ := ioutil.ReadFile(mediaPath[1])
+	_, format, err := image.Decode(bytes.NewBuffer(imageBytes))
 	if err != nil {
 		return &RevisitMsg{}, err
 	}
-	// FIXME: add sound type detection instead of hard coded ogg
-	soundDataURI := BytesToDataURI(soundBytes, "audio/ogg")
+
+	imageDataURI := BytesToDataURI(imageBytes, fmt.Sprintf("image/%s", format))
+
+	var soundDataURI string
+
+	// if we have sound info get it
+	if len(mediaPath) == 2 {
+		soundBytes, _ := ioutil.ReadFile(mediaPath[1])
+		if err != nil {
+			return &RevisitMsg{}, err
+		}
+		// FIXME: add sound type detection instead of hard coded ogg
+		soundDataURI = BytesToDataURI(soundBytes, "audio/ogg")
+	}
 
 	content := &ImageData{
 		Data: imageDataURI,
