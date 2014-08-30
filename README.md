@@ -44,6 +44,14 @@ A Story
 
 **"computers are the BEST!"**
 
+Some Go Image manipulation libraries for your glitching
+----------
+
+* [Image Magick go bindings](https://github.com/gographics/imagick)
+* [Go Image Filtering Toolkit](https://github.com/disintegration/gift)
+* [Image Extensions for Go](https://github.com/samuel/go-imagex)
+* [img](https://github.com/hawx/img)
+
 Example
 -------
 ```go
@@ -217,3 +225,4 @@ Revisit.link service
 func (rs *RevisitService) Run(port string)
 ```
 Run starts the Revisit.link service
+
