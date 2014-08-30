@@ -18,7 +18,7 @@ type RevisitImage struct {
 // contents of a RevisitMsg
 func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 	ri := &RevisitImage{
-		images: make([]image.Image, 1),
+		images: make([]image.Image, 0),
 	}
 
 	switch r.ImageType() {
