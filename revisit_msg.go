@@ -18,7 +18,7 @@ type ImageData struct {
 }
 
 // ByteReader returns an io.Reader for the image data in a Revisit message
-func (i ImageData) ByteReader() io.Reader {
+func (i *ImageData) ByteReader() io.Reader {
 	dataUri := i.Data
 	data := strings.Split(dataUri, ",")[1]
 	return base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
