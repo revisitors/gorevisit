@@ -95,7 +95,7 @@ func main() {
 	s := revisit.NewRevisitService(noise)
 
 	// run it!
-	s.Run()
+	s.Run(":8080")
 }
 ```
 
@@ -214,6 +214,6 @@ Revisit.link service
 #### func (*RevisitService) Run
 
 ```go
-func (rs *RevisitService) Run()
+func (rs *RevisitService) Run(port string)
 ```
 Run starts the Revisit.link service
