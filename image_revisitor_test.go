@@ -33,6 +33,15 @@ func TestImageRevisitorJPEG(t *testing.T) {
 	if msg.ImageType() != "image/jpeg" {
 		t.Error(err)
 	}
+
+	_, format, err := image.Decode(msg.Content.ByteReader())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if format != "jpeg" {
+		t.Errorf("translated jpeg should still be jpeg, is %s", format)
+	}
 }
 
 func TestImageRevisitorPNG(t *testing.T) {
@@ -63,6 +72,16 @@ func TestImageRevisitorPNG(t *testing.T) {
 	if msg.ImageType() != "image/png" {
 		t.Error(err)
 	}
+
+	_, format, err := image.Decode(msg.Content.ByteReader())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if format != "png" {
+		t.Errorf("translated png should still be png, is %s", format)
+	}
+
 }
 
 func TestImageRevisitorGIF(t *testing.T) {
@@ -92,5 +111,14 @@ func TestImageRevisitorGIF(t *testing.T) {
 
 	if msg.ImageType() != "image/gif" {
 		t.Error(err)
+	}
+
+	_, format, err := image.Decode(msg.Content.ByteReader())
+	if err != nil {
+		t.Error(err)
+	}
+
+	if format != "gif" {
+		t.Errorf("translated gif should still be gif, is %s", format)
 	}
 }
