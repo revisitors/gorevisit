@@ -8,7 +8,10 @@ import (
 
 // RevisitImage can hold either a PNG, JPEG, or GIF
 type RevisitImage struct {
-	images []image.Image
+	images    []image.Image
+	palettes  []image.PalettedImage
+	delay     []int
+	loopCount int
 }
 
 // NewRevisitImageFromMsg constructs a RevisitImage from the
@@ -26,6 +29,9 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 		}
 
 		ri.images = append(ri.images, img)
+		ri.delay = append(ri.delay, 0)
+		ri.loopCount = 0
+
 		return ri, nil
 
 	case "image/png":
@@ -35,6 +41,9 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 		}
 
 		ri.images = append(ri.images, img)
+		ri.delay = append(ri.delay, 0)
+		ri.loopCount = 0
+
 		return ri, nil
 
 	case "image/gif":
@@ -43,9 +52,11 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 			return nil, err
 		}
 
-		for _, g := range gifs.Image {
-			ri.images = append(ri.images, image.Image(g))
+		for i, g := range gifs.Image {
+			ri.palettes = append(ri.palettes, g)
+			ri.delay = append(ri.delay, gifs.Delay[i])
 		}
+		ri.loopCount = gifs.LoopCount
 		return ri, nil
 
 	default:
