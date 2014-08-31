@@ -30,6 +30,11 @@ func TestNewRevisitImageWithJPEG(t *testing.T) {
 	if ri.loopCount != 0 {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
+
+	_, err = ri.RevisitMsg()
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestNewRevisitImageWithPNG(t *testing.T) {
@@ -58,6 +63,12 @@ func TestNewRevisitImageWithPNG(t *testing.T) {
 	if ri.loopCount != 0 {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
+
+	_, err = ri.RevisitMsg()
+	if err != nil {
+		t.Error(err)
+	}
+
 }
 
 func TestNewRevisitImageWithGIF(t *testing.T) {
@@ -87,4 +98,8 @@ func TestNewRevisitImageWithGIF(t *testing.T) {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
 
+	_, err = ri.RevisitMsg()
+	if err != nil {
+		t.Error(err)
+	}
 }
