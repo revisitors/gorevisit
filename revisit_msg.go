@@ -62,6 +62,54 @@ func bytesToDataURI(data []byte, contentType string) string {
 		contentType, base64.StdEncoding.EncodeToString(data))
 }
 
+func NewRevisitMsgFromReaders(readers ...*io.Reader) (*RevisitMsg, error) {
+	if len(readers) < 1 || len(readers) > 2 {
+		return nil, errors.New("must have image buffer, may have audio buffer")
+	}
+
+	imageBytes, err := ioutil.ReadAll(*readers[0])
+	if err != nil {
+		return nil, err
+	}
+
+	_, format, err := image.Decode(bytes.NewBuffer(imageBytes))
+	if err != nil {
+		return &RevisitMsg{}, err
+	}
+
+	imageDataURI := bytesToDataURI(imageBytes, fmt.Sprintf("image/%s", format))
+
+	var soundDataURI string
+
+	// if we have sound info get it
+	if len(readers) == 2 {
+		soundBytes, _ := ioutil.ReadAll(*readers[0])
+		if err != nil {
+			return nil, err
+		}
+		// FIXME: add sound type detection instead of hard coded ogg
+		soundDataURI = bytesToDataURI(soundBytes, "audio/ogg")
+	}
+
+	content := &ImageData{
+		Data: imageDataURI,
+	}
+
+	audioContent := &AudioData{
+		Data: soundDataURI,
+	}
+
+	metaContent := &MetaData{
+		Audio: *audioContent,
+	}
+
+	revisitMsg := &RevisitMsg{
+		Content: *content,
+		Meta:    *metaContent,
+	}
+	return revisitMsg, nil
+}
+
 // NewRevisitMsgFromFiles given the path to an image file and optional
 // path to an audio file, creates a JSON encoded Revisit.link message
 func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {

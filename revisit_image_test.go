@@ -1,6 +1,9 @@
 package gorevisit
 
 import (
+	"image/gif"
+	"image/jpeg"
+	"image/png"
 	"testing"
 )
 
@@ -31,7 +34,12 @@ func TestNewRevisitImageWithJPEG(t *testing.T) {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
 
-	_, err = ri.RevisitMsg()
+	m, err := ri.RevisitMsg()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = jpeg.Decode(m.ImageByteReader())
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,11 +72,15 @@ func TestNewRevisitImageWithPNG(t *testing.T) {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
 
-	_, err = ri.RevisitMsg()
+	m, err := ri.RevisitMsg()
 	if err != nil {
 		t.Error(err)
 	}
 
+	_, err = png.Decode(m.ImageByteReader())
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestNewRevisitImageWithGIF(t *testing.T) {
@@ -98,7 +110,12 @@ func TestNewRevisitImageWithGIF(t *testing.T) {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
 
-	_, err = ri.RevisitMsg()
+	m, err := ri.RevisitMsg()
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = gif.Decode(m.ImageByteReader())
 	if err != nil {
 		t.Error(err)
 	}
