@@ -17,8 +17,8 @@ type ImageData struct {
 	Data string `json:"data"`
 }
 
-// ByteReader returns an io.Reader for the image data in a Revisit message
-func (i *ImageData) ByteReader() io.Reader {
+// byteReader returns an io.Reader for the image data in a Revisit message
+func (i *ImageData) byteReader() io.Reader {
 	dataUri := i.Data
 	data := strings.Split(dataUri, ",")[1]
 	return base64.NewDecoder(base64.StdEncoding, strings.NewReader(data))
@@ -41,6 +41,11 @@ type MetaData struct {
 type RevisitMsg struct {
 	Content ImageData `json:"content"`
 	Meta    MetaData  `json:"meta"`
+}
+
+// byteReader returns an io.Reader for the image data in a Revisit message
+func (r *RevisitMsg) ImageByteReader() io.Reader {
+	return r.Content.byteReader()
 }
 
 // ImageType gets the type of image that is in the message

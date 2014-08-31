@@ -16,7 +16,7 @@ import (
 func imageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
 	log.Info("ImageRevisitor called")
 
-	reader := m.Content.ByteReader()
+	reader := m.ImageByteReader()
 	srcImg, _, err := image.Decode(reader)
 	if err != nil {
 		log.WithField("error", err).Error("error decoding image")

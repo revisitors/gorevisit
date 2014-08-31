@@ -23,7 +23,7 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 
 	switch r.ImageType() {
 	case "image/jpeg":
-		img, _, err := image.Decode(r.Content.ByteReader())
+		img, _, err := image.Decode(r.ImageByteReader())
 		if err != nil {
 			return nil, err
 		}
@@ -35,7 +35,7 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 		return ri, nil
 
 	case "image/png":
-		img, _, err := image.Decode(r.Content.ByteReader())
+		img, _, err := image.Decode(r.ImageByteReader())
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 		return ri, nil
 
 	case "image/gif":
-		gifs, err := gif.DecodeAll(r.Content.ByteReader())
+		gifs, err := gif.DecodeAll(r.ImageByteReader())
 		if err != nil {
 			return nil, err
 		}

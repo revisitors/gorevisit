@@ -34,7 +34,7 @@ func TestimageRevisitorJPEG(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, format, err := image.Decode(msg.Content.ByteReader())
+	_, format, err := image.Decode(msg.ImageByteReader())
 	if err != nil {
 		t.Error(err)
 	}
@@ -73,7 +73,7 @@ func TestimageRevisitorPNG(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, format, err := image.Decode(msg.Content.ByteReader())
+	_, format, err := image.Decode(msg.ImageByteReader())
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,7 +113,7 @@ func TestimageRevisitorGIF(t *testing.T) {
 		t.Error(err)
 	}
 
-	_, format, err := image.Decode(msg.Content.ByteReader())
+	_, format, err := image.Decode(msg.ImageByteReader())
 	if err != nil {
 		t.Error(err)
 	}
