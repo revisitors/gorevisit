@@ -50,9 +50,9 @@ func (r *RevisitMsg) ImageType() string {
 	return strings.Split(subheader, ";")[0]
 }
 
-// BytesToDataURI given a byte array and a content type,
+// bytesToDataURI given a byte array and a content type,
 // creates a Data URI of the content
-func BytesToDataURI(data []byte, contentType string) string {
+func bytesToDataURI(data []byte, contentType string) string {
 	return fmt.Sprintf("data:%s;base64,%s",
 		contentType, base64.StdEncoding.EncodeToString(data))
 }
@@ -74,7 +74,7 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 		return &RevisitMsg{}, err
 	}
 
-	imageDataURI := BytesToDataURI(imageBytes, fmt.Sprintf("image/%s", format))
+	imageDataURI := bytesToDataURI(imageBytes, fmt.Sprintf("image/%s", format))
 
 	var soundDataURI string
 
@@ -85,7 +85,7 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 			return &RevisitMsg{}, err
 		}
 		// FIXME: add sound type detection instead of hard coded ogg
-		soundDataURI = BytesToDataURI(soundBytes, "audio/ogg")
+		soundDataURI = bytesToDataURI(soundBytes, "audio/ogg")
 	}
 
 	content := &ImageData{
