@@ -118,14 +118,6 @@ Docs
 
 ## Usage
 
-#### func  BytesToDataURI
-
-```go
-func BytesToDataURI(data []byte, contentType string) string
-```
-BytesToDataURI given a byte array and a content type, creates a Data URI of the
-content
-
 #### type AudioData
 
 ```go
