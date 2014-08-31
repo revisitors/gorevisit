@@ -43,7 +43,7 @@ type RevisitMsg struct {
 	Meta    MetaData  `json:"meta"`
 }
 
-// byteReader returns an io.Reader for the image data in a Revisit message
+// ImageByteReader returns an io.Reader for the image data in a Revisit message
 func (r *RevisitMsg) ImageByteReader() io.Reader {
 	return r.Content.byteReader()
 }
