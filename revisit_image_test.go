@@ -1,11 +1,28 @@
 package gorevisit
 
 import (
+	"image/color"
+	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
+	"math/rand"
 	"testing"
 )
+
+func mockTransform(src draw.Image) {
+	orig := src.Bounds()
+	numToMod := (orig.Max.X * orig.Max.Y) / 2
+	for i := 0; i < numToMod; i++ {
+		x := rand.Intn(orig.Max.X)
+		y := rand.Intn(orig.Max.Y)
+		origColor := src.At(x, y).(color.RGBA)
+		origColor.R += 30
+		origColor.B += 30
+		origColor.G += 30
+		src.Set(x, y, origColor)
+	}
+}
 
 func TestNewRevisitImageWithJPEG(t *testing.T) {
 	jpegMsg, err := NewRevisitMsgFromFiles("./fixtures/bob.jpg")
@@ -29,6 +46,8 @@ func TestNewRevisitImageWithJPEG(t *testing.T) {
 	if ri.loopCount != 0 {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
+
+	ri.Transform(mockTransform)
 
 	m, err := ri.RevisitMsg()
 	if err != nil {
@@ -64,6 +83,8 @@ func TestNewRevisitImageWithPNG(t *testing.T) {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
 
+	ri.Transform(mockTransform)
+
 	m, err := ri.RevisitMsg()
 	if err != nil {
 		t.Error(err)
@@ -97,6 +118,8 @@ func TestNewRevisitImageWithGIF(t *testing.T) {
 	if ri.loopCount != 0 {
 		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
 	}
+
+	ri.Transform(mockTransform)
 
 	m, err := ri.RevisitMsg()
 	if err != nil {

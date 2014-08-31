@@ -75,8 +75,15 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 	}
 }
 
+func (ri *RevisitImage) Transform(t func(src draw.Image)) {
+	for _, frame := range ri.rgbas {
+		t(draw.Image(&frame))
+	}
+}
+
 func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
 	buf := bytes.NewBuffer(nil)
+
 	switch ri.imgType {
 	case "image/jpeg":
 		err := jpeg.Encode(buf, image.Image(image.Image(&ri.rgbas[0])), nil)
