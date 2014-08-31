@@ -91,9 +91,9 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 
 	// apply our transformation to the image.  if there's an error,
 	// log it and for now just return the original message that we received
-	newMsg, err := ImageRevisitor(msg, rs.imageTransformer)
+	newMsg, err := imageRevisitor(msg, rs.imageTransformer)
 	if err != nil {
-		log.Errorf("error calling ImageRevisitor: %s", err)
+		log.Errorf("error calling imageRevisitor: %s", err)
 		http.Error(w, "ROTFL", http.StatusInternalServerError)
 
 		w.Header().Set("Content-Type", "application/json")
@@ -114,6 +114,6 @@ func (rs *RevisitService) Run(port string) {
 	r.HandleFunc("/", rs.serviceCheckHandler)
 	r.HandleFunc("/service", rs.serviceHandler)
 	http.Handle("/", r)
-  log.Infof("Listening to %s",port)
+	log.Infof("Listening to %s", port)
 	http.ListenAndServe(port, r)
 }

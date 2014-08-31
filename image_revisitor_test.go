@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestImageRevisitorJPEG(t *testing.T) {
+func TestimageRevisitorJPEG(t *testing.T) {
 	jpegTestFunc := func(src image.Image, dst image.RGBA) error {
 		orig := src.Bounds()
 		for x := orig.Min.X; x < orig.Max.X; x++ {
@@ -25,7 +25,7 @@ func TestImageRevisitorJPEG(t *testing.T) {
 		t.Error(err)
 	}
 
-	msg, err := ImageRevisitor(jpgMsg, jpegTestFunc)
+	msg, err := imageRevisitor(jpgMsg, jpegTestFunc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -44,7 +44,7 @@ func TestImageRevisitorJPEG(t *testing.T) {
 	}
 }
 
-func TestImageRevisitorPNG(t *testing.T) {
+func TestimageRevisitorPNG(t *testing.T) {
 	pngTestFunc := func(src image.Image, dst image.RGBA) error {
 		orig := src.Bounds()
 		for x := orig.Min.X; x < orig.Max.X; x++ {
@@ -64,7 +64,7 @@ func TestImageRevisitorPNG(t *testing.T) {
 		t.Error(err)
 	}
 
-	msg, err := ImageRevisitor(pngMsg, pngTestFunc)
+	msg, err := imageRevisitor(pngMsg, pngTestFunc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -84,7 +84,7 @@ func TestImageRevisitorPNG(t *testing.T) {
 
 }
 
-func TestImageRevisitorGIF(t *testing.T) {
+func TestimageRevisitorGIF(t *testing.T) {
 	gifTestFunc := func(src image.Image, dst image.RGBA) error {
 		orig := src.Bounds()
 		for x := orig.Min.X; x < orig.Max.X; x++ {
@@ -104,7 +104,7 @@ func TestImageRevisitorGIF(t *testing.T) {
 		t.Error(err)
 	}
 
-	msg, err := ImageRevisitor(gifMsg, gifTestFunc)
+	msg, err := imageRevisitor(gifMsg, gifTestFunc)
 	if err != nil {
 		t.Error(err)
 	}

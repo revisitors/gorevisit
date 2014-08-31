@@ -148,10 +148,10 @@ type ImageData struct {
 ImageData holds a reference the data URI of image data in a Revisit.link message
 See: https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
 
-#### func (ImageData) ByteReader
+#### func (*ImageData) ByteReader
 
 ```go
-func (i ImageData) ByteReader() io.Reader
+func (i *ImageData) ByteReader() io.Reader
 ```
 ByteReader returns an io.Reader for the image data in a Revisit message
 
@@ -166,6 +166,23 @@ type MetaData struct {
 MetaData wraps the Audio data of a Revisit.link message as per the specification
 See: http://revisit.link/spec.html
 
+#### type RevisitImage
+
+```go
+type RevisitImage struct {
+}
+```
+
+RevisitImage can hold either a PNG, JPEG, or GIF
+
+#### func  NewRevisitImageFromMsg
+
+```go
+func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error)
+```
+NewRevisitImageFromMsg constructs a RevisitImage from the contents of a
+RevisitMsg
+
 #### type RevisitMsg
 
 ```go
@@ -177,15 +194,6 @@ type RevisitMsg struct {
 
 RevisitMsg holds a decoded Revisit.link message See:
 http://revisit.link/spec.html
-
-#### func  ImageRevisitor
-
-```go
-func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error)
-```
-ImageRevisitor given a RevisitMsg and an image transformation function, runs the
-image data through the transformation and returns a new RevisitMsg with the
-transformed image
 
 #### func  NewRevisitMsgFromFiles
 
@@ -226,4 +234,3 @@ Revisit.link service
 func (rs *RevisitService) Run(port string)
 ```
 Run starts the Revisit.link service
-

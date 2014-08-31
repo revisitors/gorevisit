@@ -10,10 +10,10 @@ import (
 	"image/png"
 )
 
-// ImageRevisitor given a RevisitMsg and an image transformation function, runs the
+// imageRevisitor given a RevisitMsg and an image transformation function, runs the
 // image data through the transformation and returns a new RevisitMsg with the
 // transformed image
-func ImageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
+func imageRevisitor(m *RevisitMsg, t func(src image.Image, dst image.RGBA) error) (*RevisitMsg, error) {
 	log.Info("ImageRevisitor called")
 
 	reader := m.Content.ByteReader()
