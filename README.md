@@ -140,13 +140,6 @@ type ImageData struct {
 ImageData holds a reference the data URI of image data in a Revisit.link message
 See: https://developer.mozilla.org/en-US/docs/Web/HTTP/data_URIs
 
-#### func (*ImageData) ByteReader
-
-```go
-func (i *ImageData) ByteReader() io.Reader
-```
-ByteReader returns an io.Reader for the image data in a Revisit message
-
 #### type MetaData
 
 ```go
@@ -194,6 +187,13 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error)
 ```
 NewRevisitMsgFromFiles given the path to an image file and optional path to an
 audio file, creates a JSON encoded Revisit.link message
+
+#### func (*RevisitMsg) ImageByteReader
+
+```go
+func (r *RevisitMsg) ImageByteReader() io.Reader
+```
+ByteReader returns an io.Reader for the image data in a Revisit message
 
 #### func (*RevisitMsg) ImageType
 
