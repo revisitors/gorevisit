@@ -18,12 +18,8 @@ func TestNewRevisitImageWithJPEG(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.images) != 1 {
-		t.Errorf("ri.images length should be 1, is %d", len(ri.images))
-	}
-
-	if len(ri.palettes) != 0 {
-		t.Errorf("ri.palettes length should be 0, is %d", len(ri.palettes))
+	if len(ri.rgbas) != 1 {
+		t.Errorf("ri.rgbas length should be 1, is %d", len(ri.rgbas))
 	}
 
 	if len(ri.delay) != 1 {
@@ -56,12 +52,8 @@ func TestNewRevisitImageWithPNG(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.images) != 1 {
-		t.Errorf("ri.images length should be 1, is %d", len(ri.images))
-	}
-
-	if len(ri.palettes) != 0 {
-		t.Errorf("ri.palettes length should be 0, is %d", len(ri.palettes))
+	if len(ri.rgbas) != 1 {
+		t.Errorf("ri.rgbas length should be 1, is %d", len(ri.rgbas))
 	}
 
 	if len(ri.delay) != 1 {
@@ -94,12 +86,8 @@ func TestNewRevisitImageWithGIF(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.images) != 0 {
-		t.Errorf("ri.images length should be 0, is %d", len(ri.images))
-	}
-
-	if len(ri.palettes) != 4 {
-		t.Errorf("ri.palettes length should be 4, is %d", len(ri.palettes))
+	if len(ri.rgbas) != 4 {
+		t.Errorf("ri.rgbas length should be 4, is %d", len(ri.rgbas))
 	}
 
 	if len(ri.delay) != 4 {

@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"image"
+	"image/color"
+	"image/draw"
 	"image/gif"
 	"image/jpeg"
 	"image/png"
@@ -13,132 +15,118 @@ import (
 
 // RevisitImage can hold either a PNG, JPEG, or GIF
 type RevisitImage struct {
-	images    []image.Image
-	palettes  []image.Paletted
+	rgbas     []image.RGBA
+	palette   []color.Palette
 	delay     []int
 	loopCount int
 	imgType   string
 }
 
-func newImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
+// NewRevisitImageFromMsg constructs a RevisitImage from the
+// contents of a RevisitMsg
+func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 	ri := &RevisitImage{
-		images:    make([]image.Image, 0),
-		palettes:  make([]image.Paletted, 0),
+		rgbas:     make([]image.RGBA, 0),
+		palette:   make([]color.Palette, 0),
 		delay:     make([]int, 0),
 		loopCount: 0,
 	}
 
-	img, _, err := image.Decode(r.ImageByteReader())
-	if err != nil {
-		return nil, err
-	}
-
-	ri.images = append(ri.images, img)
-	ri.delay = append(ri.delay, 0)
-	ri.loopCount = 0
-	ri.imgType = r.ImageType()
-
-	return ri, nil
-}
-
-func newPalettedImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
-	ri := &RevisitImage{
-		images: make([]image.Image, 0),
-	}
-
-	gifs, err := gif.DecodeAll(r.ImageByteReader())
-	if err != nil {
-		return nil, err
-	}
-
-	for i, g := range gifs.Image {
-		ri.palettes = append(ri.palettes, *g)
-		ri.delay = append(ri.delay, gifs.Delay[i])
-	}
-	ri.loopCount = gifs.LoopCount
-	ri.imgType = r.ImageType()
-
-	return ri, nil
-
-}
-
-// NewRevisitImageFromMsg constructs a RevisitImage from the
-// contents of a RevisitMsg
-func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 	switch r.ImageType() {
-	case "image/jpeg":
-		return newImageFromMsg(r)
+	case "image/jpeg", "image/png":
+		src, _, err := image.Decode(r.ImageByteReader())
+		if err != nil {
+			return nil, err
+		}
 
-	case "image/png":
-		return newImageFromMsg(r)
+		b := src.Bounds()
+		rgba := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+		draw.Draw(rgba, rgba.Bounds(), src, b.Min, draw.Src)
+
+		ri.rgbas = append(ri.rgbas, *rgba)
+		ri.delay = append(ri.delay, 0)
+		ri.loopCount = 0
+		ri.imgType = r.ImageType()
+
+		return ri, nil
 
 	case "image/gif":
-		return newPalettedImageFromMsg(r)
+		gifs, err := gif.DecodeAll(r.ImageByteReader())
+		if err != nil {
+			return nil, err
+		}
+
+		for _, src := range gifs.Image {
+			b := src.Bounds()
+			rgba := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
+			draw.Draw(rgba, rgba.Bounds(), src, b.Min, draw.Src)
+
+			ri.rgbas = append(ri.rgbas, *rgba)
+			ri.palette = append(ri.palette, src.Palette)
+			ri.delay = append(ri.delay, 0)
+		}
+		ri.loopCount = gifs.LoopCount
+		ri.imgType = r.ImageType()
+
+		return ri, nil
 
 	default:
 		return nil, errors.New("invalid image type")
 	}
 }
 
-func (ri *RevisitImage) palettedToRevisitMsg() (*RevisitMsg, error) {
-	g := &gif.GIF{
-		Image:     make([]*image.Paletted, 0),
-		LoopCount: ri.loopCount,
-		Delay:     make([]int, 0),
-	}
-
-	for index, pal := range ri.palettes {
-		g.Image = append(g.Image, &pal)
-		g.Delay = append(g.Delay, ri.delay[index])
-	}
-
-	buf := bytes.NewBuffer(nil)
-	err := gif.EncodeAll(buf, g)
-	if err != nil {
-		return nil, err
-	}
-
-	dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
-	return &RevisitMsg{
-		Content: ImageData{
-			Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
-		},
-	}, nil
-}
-
-func (ri *RevisitImage) imageToRevisitMsg() (*RevisitMsg, error) {
-	buf := bytes.NewBuffer(nil)
-	switch ri.imgType {
-	case "image/jpeg":
-		err := jpeg.Encode(buf, ri.images[0], nil)
-		if err != nil {
-			return nil, err
-		}
-
-	case "image/png":
-		err := png.Encode(buf, ri.images[0])
-		if err != nil {
-			return nil, err
-		}
-
-	default:
-		return nil, errors.New("invalid image type")
-	}
-
-	dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
-	return &RevisitMsg{
-		Content: ImageData{
-			Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
-		},
-	}, nil
-}
-
-// RevisitMsg returns a RevisitMsg from a RevisitImage
 func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
+	buf := bytes.NewBuffer(nil)
 	switch ri.imgType {
+	case "image/jpeg":
+		err := jpeg.Encode(buf, image.Image(image.Image(&ri.rgbas[0])), nil)
+		if err != nil {
+			return nil, err
+		}
+
+	case "image/png":
+		err := png.Encode(buf, image.Image(&ri.rgbas[0]))
+		if err != nil {
+			return nil, err
+		}
+
 	case "image/gif":
-		return ri.palettedToRevisitMsg()
+		g := &gif.GIF{
+			Image:     make([]*image.Paletted, 0),
+			LoopCount: ri.loopCount,
+			Delay:     make([]int, 0),
+		}
+
+		for index, src := range ri.rgbas {
+			b := src.Bounds()
+			pal := image.NewPaletted(image.Rect(0, 0, b.Dx(), b.Dy()), ri.palette[index])
+			draw.Draw(pal, pal.Bounds(), image.Image(&src), b.Min, draw.Src)
+
+			g.Image = append(g.Image, pal)
+			g.Delay = append(g.Delay, ri.delay[index])
+		}
+
+		buf := bytes.NewBuffer(nil)
+		err := gif.EncodeAll(buf, g)
+		if err != nil {
+			return nil, err
+		}
+
+		dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
+		return &RevisitMsg{
+			Content: ImageData{
+				Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
+			},
+		}, nil
+
 	default:
-		return ri.imageToRevisitMsg()
+		return nil, errors.New("invalid image type")
 	}
+
+	dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
+	return &RevisitMsg{
+		Content: ImageData{
+			Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
+		},
+	}, nil
 }
