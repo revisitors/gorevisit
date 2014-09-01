@@ -168,6 +168,18 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error)
 NewRevisitImageFromMsg constructs a RevisitImage from the contents of a
 RevisitMsg
 
+#### func (*RevisitImage) RevisitMsg
+
+```go
+func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error)
+```
+
+#### func (*RevisitImage) Transform
+
+```go
+func (ri *RevisitImage) Transform(t func(src draw.Image))
+```
+
 #### type RevisitMsg
 
 ```go
@@ -188,12 +200,18 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error)
 NewRevisitMsgFromFiles given the path to an image file and optional path to an
 audio file, creates a JSON encoded Revisit.link message
 
+#### func  NewRevisitMsgFromReaders
+
+```go
+func NewRevisitMsgFromReaders(readers ...*io.Reader) (*RevisitMsg, error)
+```
+
 #### func (*RevisitMsg) ImageByteReader
 
 ```go
 func (r *RevisitMsg) ImageByteReader() io.Reader
 ```
-ByteReader returns an io.Reader for the image data in a Revisit message
+ImageByteReader returns an io.Reader for the image data in a Revisit message
 
 #### func (*RevisitMsg) ImageType
 
@@ -215,7 +233,7 @@ Currently, this consists of an imageTransformer
 #### func  NewRevisitService
 
 ```go
-func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService
+func NewRevisitService(it func(draw.Image)) *RevisitService
 ```
 NewRevisitService given an image transformation function, returns a new
 Revisit.link service
