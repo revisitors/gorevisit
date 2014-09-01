@@ -11,7 +11,10 @@ import (
 )
 
 const (
-	payloadLimit = 1e6
+	// revisit spec size limit is 1 MB per media item.
+	// this limits payload size of entire message to
+	// 2 meg with a little overhead for json
+	payloadLimit = 2001000
 )
 
 var (
@@ -19,56 +22,33 @@ var (
 )
 
 // RevisitService holds the necessary context for a Revisit.link service.
-// Currently, this consists of an imageTransformer
+// Currently gorevisit only handles image data.
 type RevisitService struct {
-	imageTransformer func(draw.Image)
+	glitcher func(draw.Image)
 }
 
 // NewRevisitService given an image transformation function, returns
-// a new Revisit.link service
-func NewRevisitService(it func(draw.Image)) *RevisitService {
-	return &RevisitService{imageTransformer: it}
+// a new Revisit.link service.
+// The image transformation service receives a draw.Image interface
+// as an argument.  Note that draw.Image also implements image.Image.
+// For details see:
+// * http://golang.org/pkg/image/draw/
+// * http://golang.org/pkg/image/#Image
+func NewRevisitService(g func(draw.Image)) *RevisitService {
+	return &RevisitService{glitcher: g}
 }
 
-// serviceCheckHandler responds to availability requests from a Revisit.link hub
-func (rs *RevisitService) serviceCheckHandler(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case "HEAD":
-		w.WriteHeader(http.StatusOK)
-		return
-	default:
-		w.WriteHeader(http.StatusNotFound)
-		return
-	}
-}
-
-// serviceHandler appropriately routes service requests from a Revisit.link hub
-func (rs *RevisitService) serviceHandler(w http.ResponseWriter, r *http.Request) {
-	log.Infof("%v", r)
-
-	switch r.Method {
-	case "POST":
-		rs.postHandler(w, r)
-	case "HEAD":
-		w.WriteHeader(http.StatusOK)
-		return
-	default:
-		log.Infof("%v", r.Method)
-		w.WriteHeader(http.StatusAccepted)
-		return
-	}
+// headHandler responds to availability requests from a Revisit.link hub
+// see: http://revisit.link/spec.html
+func (rs *RevisitService) headHandler(w http.ResponseWriter, r *http.Request) {
+	log.Info("%v", r)
+	w.WriteHeader(http.StatusOK)
 }
 
 // postHandler accepts POSTed revisit messages from a Revisit.link hub,
-// transforms the message, and returns the transformed message to the hub
+// transforms the message, and returns the transformed message to the hub.
+// See: http://revisit.link/spec.html
 func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
-
-	// check for valid header
-	if r.Header.Get("Content-Type") != "application/json" {
-		log.Errorf("error invalid header: %d", http.StatusUnsupportedMediaType)
-		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
-		return
-	}
 
 	// make sure message isn't too large
 	payloadReadCloser := http.MaxBytesReader(w, r.Body, payloadLimit)
@@ -89,6 +69,7 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// construct a RevisitImage from the payload
 	ri, err := NewRevisitImageFromMsg(msg)
 	if err != nil {
 		log.Errorf("error decoding json: %d", http.StatusUnsupportedMediaType)
@@ -96,10 +77,12 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// for each image frame (only 1 if jpeg or png), call the glitcher
 	for _, rgba := range ri.rgbas {
-		rs.imageTransformer(draw.Image(&rgba))
+		rs.glitcher(draw.Image(&rgba))
 	}
 
+	// create a new message from the modified image
 	newMsg, err := ri.RevisitMsg()
 	if err != nil {
 		log.Errorf("error decoding json: %d", http.StatusInternalServerError)
@@ -110,15 +93,19 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	enc := json.NewEncoder(w)
 	enc.Encode(newMsg)
-	return
 }
 
 // Run starts the Revisit.link service
 func (rs *RevisitService) Run(port string) {
-	r := mux.NewRouter()
-	r.HandleFunc("/", rs.serviceCheckHandler)
-	r.HandleFunc("/service", rs.serviceHandler)
-	http.Handle("/", r)
+	rmux := mux.NewRouter()
+
+	rmux.HandleFunc("/", rs.headHandler)
+
+	rmux.HandleFunc("/service", rs.postHandler).
+		Methods("POST").
+		Headers("Content-Type", "application/json")
+
+	http.Handle("/", rmux)
 	log.Infof("Listening to %s", port)
-	http.ListenAndServe(port, r)
+	http.ListenAndServe(port, rmux)
 }
