@@ -3,21 +3,27 @@ package gorevisit
 import (
 	"bytes"
 	"encoding/json"
-	"image"
+	"image/color"
+	"image/draw"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 )
 
-func echoService(src image.Image, dst image.RGBA) error {
+func noise(src draw.Image) {
 	orig := src.Bounds()
-	for x := orig.Min.X; x < orig.Max.X; x++ {
-		for y := orig.Min.Y; y < orig.Max.Y; y++ {
-			dst.Set(x, y, src.At(x, y))
-		}
+	numToMod := (orig.Max.X * orig.Max.Y) / 2
+	for i := 0; i < numToMod; i++ {
+		x := rand.Intn(orig.Max.X)
+		y := rand.Intn(orig.Max.Y)
+		origColor := src.At(x, y).(color.RGBA)
+		origColor.R += 30
+		origColor.B += 30
+		origColor.G += 30
+		src.Set(x, y, origColor)
 	}
-	return nil
 }
 
 func TestRevisitHandlerPost(t *testing.T) {
@@ -37,7 +43,7 @@ func TestRevisitHandlerPost(t *testing.T) {
 
 	w := httptest.NewRecorder()
 
-	service := NewRevisitService(echoService)
+	service := NewRevisitService(noise)
 	service.serviceHandler(w, req)
 
 	if w.Code != http.StatusOK {

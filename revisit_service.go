@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"github.com/Sirupsen/logrus"
 	"github.com/gorilla/mux"
-	"image"
+	"image/draw"
 	"io/ioutil"
 	"net/http"
 )
@@ -21,12 +21,12 @@ var (
 // RevisitService holds the necessary context for a Revisit.link service.
 // Currently, this consists of an imageTransformer
 type RevisitService struct {
-	imageTransformer func(image.Image, image.RGBA) error
+	imageTransformer func(draw.Image)
 }
 
 // NewRevisitService given an image transformation function, returns
 // a new Revisit.link service
-func NewRevisitService(it func(image.Image, image.RGBA) error) *RevisitService {
+func NewRevisitService(it func(draw.Image)) *RevisitService {
 	return &RevisitService{imageTransformer: it}
 }
 
@@ -89,16 +89,21 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// apply our transformation to the image.  if there's an error,
-	// log it and for now just return the original message that we received
-	newMsg, err := imageRevisitor(msg, rs.imageTransformer)
+	ri, err := NewRevisitImageFromMsg(msg)
 	if err != nil {
-		log.Errorf("error calling imageRevisitor: %s", err)
-		http.Error(w, "ROTFL", http.StatusInternalServerError)
+		log.Errorf("error decoding json: %d", http.StatusUnsupportedMediaType)
+		http.Error(w, "ROTFL", http.StatusUnsupportedMediaType)
+		return
+	}
 
-		w.Header().Set("Content-Type", "application/json")
-		enc := json.NewEncoder(w)
-		enc.Encode(msg)
+	for _, rgba := range ri.rgbas {
+		rs.imageTransformer(draw.Image(&rgba))
+	}
+
+	newMsg, err := ri.RevisitMsg()
+	if err != nil {
+		log.Errorf("error decoding json: %d", http.StatusInternalServerError)
+		http.Error(w, "ROTFL", http.StatusInternalServerError)
 		return
 	}
 
