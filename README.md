@@ -183,8 +183,10 @@ audio file, creates a JSON encoded Revisit.link message
 #### func  NewRevisitMsgFromReaders
 
 ```go
-func NewRevisitMsgFromReaders(readers ...*io.Reader) (*RevisitMsg, error)
+func NewRevisitMsgFromReaders(readers ...io.Reader) (*RevisitMsg, error)
 ```
+NewRevisitMsgFromReaders given an io.Reader containing an image file and
+optional io.Reader containing a sound file, returns a *RevisitMsg
 
 #### func (*RevisitMsg) ImageByteReader
 
@@ -207,16 +209,19 @@ type RevisitService struct {
 }
 ```
 
-RevisitService holds the necessary context for a Revisit.link service.
-Currently, this consists of an imageTransformer
+RevisitService holds the necessary context for a Revisit.link service. Currently
+gorevisit only handles image data.
 
 #### func  NewRevisitService
 
 ```go
-func NewRevisitService(it func(draw.Image)) *RevisitService
+func NewRevisitService(g func(draw.Image)) *RevisitService
 ```
 NewRevisitService given an image transformation function, returns a new
-Revisit.link service
+Revisit.link service. The image transformation service receives a draw.Image
+interface as an argument. Note that draw.Image also implements image.Image. For
+details see: * http://golang.org/pkg/image/draw/ *
+http://golang.org/pkg/image/#Image
 
 #### func (*RevisitService) Run
 
