@@ -8,6 +8,7 @@ import (
 	"image"
 	"io"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -62,12 +63,14 @@ func bytesToDataURI(data []byte, contentType string) string {
 		contentType, base64.StdEncoding.EncodeToString(data))
 }
 
-func NewRevisitMsgFromReaders(readers ...*io.Reader) (*RevisitMsg, error) {
+// NewRevisitMsgFromReaders given an io.Reader containing an image file
+// and optional io.Reader containing a sound file, returns a *RevisitMsg
+func NewRevisitMsgFromReaders(readers ...io.Reader) (*RevisitMsg, error) {
 	if len(readers) < 1 || len(readers) > 2 {
 		return nil, errors.New("must have image buffer, may have audio buffer")
 	}
 
-	imageBytes, err := ioutil.ReadAll(*readers[0])
+	imageBytes, err := ioutil.ReadAll(readers[0])
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +86,7 @@ func NewRevisitMsgFromReaders(readers ...*io.Reader) (*RevisitMsg, error) {
 
 	// if we have sound info get it
 	if len(readers) == 2 {
-		soundBytes, _ := ioutil.ReadAll(*readers[0])
+		soundBytes, _ := ioutil.ReadAll(readers[1])
 		if err != nil {
 			return nil, err
 		}
@@ -117,45 +120,28 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 		return &RevisitMsg{}, errors.New("must have image, may have audio")
 	}
 
-	imageBytes, err := ioutil.ReadFile(mediaPath[0])
+	iFile, err := os.Open(mediaPath[0])
 	if err != nil {
-		return &RevisitMsg{}, err
+		return nil, err
 	}
 
-	_, format, err := image.Decode(bytes.NewBuffer(imageBytes))
-	if err != nil {
-		return &RevisitMsg{}, err
-	}
-
-	imageDataURI := bytesToDataURI(imageBytes, fmt.Sprintf("image/%s", format))
-
-	var soundDataURI string
-
+	var revisitMsg *RevisitMsg
 	// if we have sound info get it
 	if len(mediaPath) == 2 {
-		soundBytes, _ := ioutil.ReadFile(mediaPath[1])
+		sFile, err := os.Open(mediaPath[1])
 		if err != nil {
-			return &RevisitMsg{}, err
+			return nil, err
 		}
-		// FIXME: add sound type detection instead of hard coded ogg
-		soundDataURI = bytesToDataURI(soundBytes, "audio/ogg")
+		revisitMsg, err = NewRevisitMsgFromReaders(iFile, sFile)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		revisitMsg, err = NewRevisitMsgFromReaders(iFile)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	content := &ImageData{
-		Data: imageDataURI,
-	}
-
-	audioContent := &AudioData{
-		Data: soundDataURI,
-	}
-
-	metaContent := &MetaData{
-		Audio: *audioContent,
-	}
-
-	revisitMsg := &RevisitMsg{
-		Content: *content,
-		Meta:    *metaContent,
-	}
 	return revisitMsg, nil
 }
