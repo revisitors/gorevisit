@@ -44,25 +44,6 @@ type RevisitMsg struct {
 	Meta    MetaData  `json:"meta"`
 }
 
-// ImageByteReader returns an io.Reader for the image data in a Revisit message
-func (r *RevisitMsg) ImageByteReader() io.Reader {
-	return r.Content.byteReader()
-}
-
-// ImageType gets the type of image that is in the message
-func (r *RevisitMsg) ImageType() string {
-	header := strings.Split(r.Content.Data, ",")[0]
-	subheader := strings.Split(header, ":")[1]
-	return strings.Split(subheader, ";")[0]
-}
-
-// bytesToDataURI given a byte array and a content type,
-// creates a Data URI of the content
-func bytesToDataURI(data []byte, contentType string) string {
-	return fmt.Sprintf("data:%s;base64,%s",
-		contentType, base64.StdEncoding.EncodeToString(data))
-}
-
 // NewRevisitMsgFromReaders given an io.Reader containing an image file
 // and optional io.Reader containing a sound file, returns a *RevisitMsg
 func NewRevisitMsgFromReaders(readers ...io.Reader) (*RevisitMsg, error) {
@@ -144,4 +125,32 @@ func NewRevisitMsgFromFiles(mediaPath ...string) (*RevisitMsg, error) {
 	}
 
 	return revisitMsg, nil
+}
+
+// IsValidSize makes sure the size of the media in a RevisitMsg matches the spec
+func (r *RevisitMsg) IsValidSize() bool {
+	if len(r.Content.Data) > 1048576 || len(r.Meta.Audio.Data) > 1048576 {
+		return false
+	} else {
+		return true
+	}
+}
+
+// ImageByteReader returns an io.Reader for the image data in a Revisit message
+func (r *RevisitMsg) ImageByteReader() io.Reader {
+	return r.Content.byteReader()
+}
+
+// ImageType gets the type of image that is in the message
+func (r *RevisitMsg) ImageType() string {
+	header := strings.Split(r.Content.Data, ",")[0]
+	subheader := strings.Split(header, ":")[1]
+	return strings.Split(subheader, ";")[0]
+}
+
+// bytesToDataURI given a byte array and a content type,
+// creates a Data URI of the content
+func bytesToDataURI(data []byte, contentType string) string {
+	return fmt.Sprintf("data:%s;base64,%s",
+		contentType, base64.StdEncoding.EncodeToString(data))
 }

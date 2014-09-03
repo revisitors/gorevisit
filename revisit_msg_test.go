@@ -36,3 +36,24 @@ func TestNewRevisitMsgFromFilesWithPNG(t *testing.T) {
 		t.Errorf("image type should be 'image/png' is %s", msg.ImageType())
 	}
 }
+
+func TestIsValidSize(t *testing.T) {
+	bigImageBytes := make([]byte, 2000000)
+	bigImage := &ImageData{Data: string(bigImageBytes)}
+	msg := &RevisitMsg{
+		Content: *bigImage,
+	}
+	if msg.IsValidSize() == true {
+		t.Error("image should be too large but IsValidSize returned true")
+	}
+
+	smallImageBytes := make([]byte, 200)
+	smallImage := &ImageData{Data: string(smallImageBytes)}
+	msg = &RevisitMsg{
+		Content: *smallImage,
+	}
+	if msg.IsValidSize() == false {
+		t.Error("image should be fine but IsValidSize returned false")
+	}
+
+}
