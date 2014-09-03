@@ -50,3 +50,80 @@ func TestRevisitHandlerPost(t *testing.T) {
 		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)
 	}
 }
+
+func TestRevisitHandlerPostJPEG(t *testing.T) {
+	jpegMsg, err := NewRevisitMsgFromFiles("./fixtures/bob.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	jsonBytes, err := json.Marshal(jpegMsg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, _ := http.NewRequest("POST", "http://whatever", bytes.NewReader(jsonBytes))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", strconv.Itoa(len(jsonBytes)))
+
+	w := httptest.NewRecorder()
+
+	service := NewRevisitService(noise)
+	service.postHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)
+	}
+}
+
+func TestRevisitHandlerPostPNG(t *testing.T) {
+	pngMsg, err := NewRevisitMsgFromFiles("./fixtures/connie.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	jsonBytes, err := json.Marshal(pngMsg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, _ := http.NewRequest("POST", "http://whatever", bytes.NewReader(jsonBytes))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", strconv.Itoa(len(jsonBytes)))
+
+	w := httptest.NewRecorder()
+
+	service := NewRevisitService(noise)
+	service.postHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)
+	}
+
+}
+
+func testRevisitHandlerPostGIF(t *testing.T) {
+	gifMsg, err := NewRevisitMsgFromFiles("./fixtures/bob.gif")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	jsonBytes, err := json.Marshal(gifMsg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req, _ := http.NewRequest("POST", "http://whatever", bytes.NewReader(jsonBytes))
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Content-Length", strconv.Itoa(len(jsonBytes)))
+
+	w := httptest.NewRecorder()
+
+	service := NewRevisitService(noise)
+	service.postHandler(w, req)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("expected %d status, received %d", http.StatusOK, w.Code)
+	}
+
+}
