@@ -35,16 +35,16 @@ func TestNewRevisitImageWithJPEG(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.rgbas) != 1 {
-		t.Errorf("ri.rgbas length should be 1, is %d", len(ri.rgbas))
+	if len(ri.Rgbas) != 1 {
+		t.Errorf("ri.Rgbas length should be 1, is %d", len(ri.Rgbas))
 	}
 
-	if len(ri.delay) != 1 {
-		t.Errorf("ri.delay length should be 1, is %d", len(ri.delay))
+	if len(ri.Delay) != 1 {
+		t.Errorf("ri.Delay length should be 1, is %d", len(ri.Delay))
 	}
 
-	if ri.loopCount != 0 {
-		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
+	if ri.LoopCount != 0 {
+		t.Errorf("LoopCount should be 0, is %d", ri.LoopCount)
 	}
 
 	ri.Transform(mockTransform)
@@ -71,16 +71,16 @@ func TestNewRevisitImageWithPNG(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.rgbas) != 1 {
-		t.Errorf("ri.rgbas length should be 1, is %d", len(ri.rgbas))
+	if len(ri.Rgbas) != 1 {
+		t.Errorf("ri.Rgbas length should be 1, is %d", len(ri.Rgbas))
 	}
 
-	if len(ri.delay) != 1 {
-		t.Errorf("ri.delay length should be 1, is %d", len(ri.delay))
+	if len(ri.Delay) != 1 {
+		t.Errorf("ri.Delay length should be 1, is %d", len(ri.Delay))
 	}
 
-	if ri.loopCount != 0 {
-		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
+	if ri.LoopCount != 0 {
+		t.Errorf("LoopCount should be 0, is %d", ri.LoopCount)
 	}
 
 	ri.Transform(mockTransform)
@@ -107,16 +107,16 @@ func TestNewRevisitImageWithGIF(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(ri.rgbas) != 4 {
-		t.Errorf("ri.rgbas length should be 4, is %d", len(ri.rgbas))
+	if len(ri.Rgbas) != 4 {
+		t.Errorf("ri.Rgbas length should be 4, is %d", len(ri.Rgbas))
 	}
 
-	if len(ri.delay) != 4 {
-		t.Errorf("ri.delay length should be 4, is %d", len(ri.delay))
+	if len(ri.Delay) != 4 {
+		t.Errorf("ri.Delay length should be 4, is %d", len(ri.Delay))
 	}
 
-	if ri.loopCount != 0 {
-		t.Errorf("loopCount should be 0, is %d", ri.loopCount)
+	if ri.LoopCount != 0 {
+		t.Errorf("LoopCount should be 0, is %d", ri.LoopCount)
 	}
 
 	ri.Transform(mockTransform)

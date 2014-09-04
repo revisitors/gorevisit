@@ -15,21 +15,21 @@ import (
 
 // RevisitImage can hold either a PNG, JPEG, or GIF
 type RevisitImage struct {
-	rgbas     []image.RGBA
-	palette   []color.Palette
-	delay     []int
-	loopCount int
-	imgType   string
+	Rgbas     []image.RGBA
+	Palette   []color.Palette
+	Delay     []int
+	LoopCount int
+	ImgType   string
 }
 
 // NewRevisitImageFromMsg constructs a RevisitImage from the
 // contents of a RevisitMsg
 func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 	ri := &RevisitImage{
-		rgbas:     make([]image.RGBA, 0),
-		palette:   make([]color.Palette, 0),
-		delay:     make([]int, 0),
-		loopCount: 0,
+		Rgbas:     make([]image.RGBA, 0),
+		Palette:   make([]color.Palette, 0),
+		Delay:     make([]int, 0),
+		LoopCount: 0,
 	}
 
 	switch r.ImageType() {
@@ -43,10 +43,10 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 		rgba := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 		draw.Draw(rgba, rgba.Bounds(), src, b.Min, draw.Src)
 
-		ri.rgbas = append(ri.rgbas, *rgba)
-		ri.delay = append(ri.delay, 0)
-		ri.loopCount = 0
-		ri.imgType = r.ImageType()
+		ri.Rgbas = append(ri.Rgbas, *rgba)
+		ri.Delay = append(ri.Delay, 0)
+		ri.LoopCount = 0
+		ri.ImgType = r.ImageType()
 
 		return ri, nil
 
@@ -61,12 +61,12 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 			rgba := image.NewRGBA(image.Rect(0, 0, b.Dx(), b.Dy()))
 			draw.Draw(rgba, rgba.Bounds(), src, b.Min, draw.Src)
 
-			ri.rgbas = append(ri.rgbas, *rgba)
-			ri.palette = append(ri.palette, src.Palette)
-			ri.delay = append(ri.delay, 0)
+			ri.Rgbas = append(ri.Rgbas, *rgba)
+			ri.Palette = append(ri.Palette, src.Palette)
+			ri.Delay = append(ri.Delay, 0)
 		}
-		ri.loopCount = gifs.LoopCount
-		ri.imgType = r.ImageType()
+		ri.LoopCount = gifs.LoopCount
+		ri.ImgType = r.ImageType()
 
 		return ri, nil
 
@@ -76,7 +76,7 @@ func NewRevisitImageFromMsg(r *RevisitMsg) (*RevisitImage, error) {
 }
 
 func (ri *RevisitImage) Transform(t func(src draw.Image)) {
-	for _, frame := range ri.rgbas {
+	for _, frame := range ri.Rgbas {
 		t(draw.Image(&frame))
 	}
 }
@@ -84,15 +84,15 @@ func (ri *RevisitImage) Transform(t func(src draw.Image)) {
 func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
 	buf := bytes.NewBuffer(nil)
 
-	switch ri.imgType {
+	switch ri.ImgType {
 	case "image/jpeg":
-		err := jpeg.Encode(buf, image.Image(image.Image(&ri.rgbas[0])), nil)
+		err := jpeg.Encode(buf, image.Image(image.Image(&ri.Rgbas[0])), nil)
 		if err != nil {
 			return nil, err
 		}
 
 	case "image/png":
-		err := png.Encode(buf, image.Image(&ri.rgbas[0]))
+		err := png.Encode(buf, image.Image(&ri.Rgbas[0]))
 		if err != nil {
 			return nil, err
 		}
@@ -100,17 +100,17 @@ func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
 	case "image/gif":
 		g := &gif.GIF{
 			Image:     make([]*image.Paletted, 0),
-			LoopCount: ri.loopCount,
+			LoopCount: ri.LoopCount,
 			Delay:     make([]int, 0),
 		}
 
-		for index, src := range ri.rgbas {
+		for index, src := range ri.Rgbas {
 			b := src.Bounds()
-			pal := image.NewPaletted(image.Rect(0, 0, b.Dx(), b.Dy()), ri.palette[index])
+			pal := image.NewPaletted(image.Rect(0, 0, b.Dx(), b.Dy()), ri.Palette[index])
 			draw.Draw(pal, pal.Bounds(), image.Image(&src), b.Min, draw.Src)
 
 			g.Image = append(g.Image, pal)
-			g.Delay = append(g.Delay, ri.delay[index])
+			g.Delay = append(g.Delay, ri.Delay[index])
 		}
 
 		buf := bytes.NewBuffer(nil)
@@ -122,7 +122,7 @@ func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
 		dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 		return &RevisitMsg{
 			Content: ImageData{
-				Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
+				Data: fmt.Sprintf("data:%s;base64,%s", ri.ImgType, dstImgBase64),
 			},
 		}, nil
 
@@ -133,7 +133,7 @@ func (ri *RevisitImage) RevisitMsg() (*RevisitMsg, error) {
 	dstImgBase64 := base64.StdEncoding.EncodeToString(buf.Bytes())
 	return &RevisitMsg{
 		Content: ImageData{
-			Data: fmt.Sprintf("data:%s;base64,%s", ri.imgType, dstImgBase64),
+			Data: fmt.Sprintf("data:%s;base64,%s", ri.ImgType, dstImgBase64),
 		},
 	}, nil
 }

@@ -135,6 +135,11 @@ See: http://revisit.link/spec.html
 
 ```go
 type RevisitImage struct {
+	Rgbas     []image.RGBA
+	Palette   []color.Palette
+	Delay     []int
+	LoopCount int
+	ImgType   string
 }
 ```
 
@@ -201,6 +206,13 @@ ImageByteReader returns an io.Reader for the image data in a Revisit message
 func (r *RevisitMsg) ImageType() string
 ```
 ImageType gets the type of image that is in the message
+
+#### func (*RevisitMsg) IsValidSize
+
+```go
+func (r *RevisitMsg) IsValidSize() bool
+```
+IsValidSize makes sure the size of the media in a RevisitMsg matches the spec
 
 #### type RevisitService
 

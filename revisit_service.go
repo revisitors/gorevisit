@@ -78,7 +78,7 @@ func (rs *RevisitService) postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// for each image frame (only 1 if jpeg or png), call the glitcher
-	for _, rgba := range ri.rgbas {
+	for _, rgba := range ri.Rgbas {
 		rs.glitcher(draw.Image(&rgba))
 	}
 
